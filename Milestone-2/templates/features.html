@@ -1,0 +1,376 @@
+{% extends "base.html" %}
+
+{% block title %}Features - AI-AgroBot{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .gradient-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    .feature-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    .icon-circle {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 2rem;
+    }
+    .bg-soft-primary { background-color: rgba(13, 110, 253, 0.1); }
+    .bg-soft-success { background-color: rgba(25, 135, 84, 0.1); }
+    .bg-soft-warning { background-color: rgba(255, 193, 7, 0.1); }
+    .bg-soft-danger { background-color: rgba(220, 53, 69, 0.1); }
+    .bg-soft-info { background-color: rgba(13, 202, 240, 0.1); }
+    .bg-soft-secondary { background-color: rgba(108, 117, 125, 0.1); }
+    .text-gradient {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .btn-gradient {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+        color: white;
+    }
+    .btn-gradient:hover {
+        background: linear-gradient(135deg, #764ba2, #667eea);
+        color: white;
+    }
+    .feature-item i.bi-check-circle-fill {
+        color: #28a745;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header with gradient -->
+<section class="py-5 gradient-header text-black">
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-4 fw-bold mb-3">Powerful Features for Modern Farmers</h1>
+                <p class="lead mb-0">Everything you need to farm smarter, not harder</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Main Features -->
+<section class="py-5">
+    <div class="container">
+        <!-- AI Chat Features (kept original, but enhanced button) -->
+        <div class="row align-items-center mb-5">
+            <div class="col-lg-6">
+                <h2 class="fw-bold mb-4">🤖 AI Chat Assistant</h2>
+                <div class="feature-item mb-3">
+                    <h5><i class="bi bi-check-circle-fill text-success me-2"></i>24/7 Instant Responses</h5>
+                    <p class="text-muted">Get immediate answers to all your farming questions anytime, anywhere.</p>
+                </div>
+                <div class="feature-item mb-3">
+                    <h5><i class="bi bi-check-circle-fill text-success me-2"></i>Personalized Advice</h5>
+                    <p class="text-muted">Responses tailored to your specific crops, region, and farm conditions.</p>
+                </div>
+                <div class="feature-item mb-3">
+                    <h5><i class="bi bi-check-circle-fill text-success me-2"></i>Multi-language Support</h5>
+                    <p class="text-muted">Communicate in your preferred language for better understanding.</p>
+                </div>
+                <a href="{{ url_for('chat') }}" class="btn btn-success btn-gradient">Try AI Chat</a>
+            </div>
+            <div class="col-lg-6">
+                <img src="{{ url_for('static', filename='images/ai-chat.jpg') }}"
+                     class="img-fluid rounded shadow" alt="AI Chat">
+            </div>
+        </div>
+
+        <!-- Image Analysis Features -->
+        <div class="row align-items-center mb-5 flex-lg-row-reverse">
+            <div class="col-lg-6">
+                <h2 class="fw-bold mb-4">📸 Smart Image Analysis</h2>
+                <div class="feature-item mb-3">
+                    <h5><i class="bi bi-check-circle-fill text-success me-2"></i>Disease Detection</h5>
+                    <p class="text-muted">Instantly identify plant diseases from photos with AI vision.</p>
+                </div>
+                <div class="feature-item mb-3">
+                    <h5><i class="bi bi-check-circle-fill text-success me-2"></i>Nutrient Deficiency Analysis</h5>
+                    <p class="text-muted">Detect nutrient deficiencies before they affect yield.</p>
+                </div>
+                <div class="feature-item mb-3">
+                    <h5><i class="bi bi-check-circle-fill text-success me-2"></i>Pest Identification</h5>
+                    <p class="text-muted">Identify pests and get organic/chemical treatment options.</p>
+                </div>
+                <a href="{{ url_for('chat') }}" class="btn btn-warning">Upload Image</a>
+            </div>
+            <div class="col-lg-6">
+                <img src="{{ url_for('static', filename='images/image-analysis.jpg') }}"
+                     class="img-fluid rounded shadow" alt="Image Analysis">
+            </div>
+        </div>
+
+        <!-- Market Intelligence -->
+        <div class="row align-items-center mb-5">
+            <div class="col-lg-6">
+                <h2 class="fw-bold mb-4">📈 Market Intelligence</h2>
+                <div class="feature-item mb-3">
+                    <h5><i class="bi bi-check-circle-fill text-success me-2"></i>Real-time Prices</h5>
+                    <p class="text-muted">Live market prices for all major crops and commodities.</p>
+                </div>
+                <div class="feature-item mb-3">
+                    <h5><i class="bi bi-check-circle-fill text-success me-2"></i>Price Forecasts</h5>
+                    <p class="text-muted">AI-powered price predictions for better selling decisions.</p>
+                </div>
+                <div class="feature-item mb-3">
+                    <h5><i class="bi bi-check-circle-fill text-success me-2"></i>Demand Analysis</h5>
+                    <p class="text-muted">Understand market demand trends for different crops.</p>
+                </div>
+                <a href="{{ url_for('market_prices') }}" class="btn btn-info">View Market Data</a>
+            </div>
+            <div class="col-lg-6">
+                <img src="{{ url_for('static', filename='images/market-analytics.jpg') }}"
+                     class="img-fluid rounded shadow" alt="Market Intelligence">
+            </div>
+        </div>
+
+        <!-- New Section: Soil & Crop Health -->
+        <div class="row align-items-center mb-5 flex-lg-row-reverse">
+            <div class="col-lg-6">
+                <h2 class="fw-bold mb-4">🌱 Soil & Crop Health</h2>
+                <div class="feature-item mb-3">
+                    <h5><i class="bi bi-check-circle-fill text-success me-2"></i>Soil Analysis</h5>
+                    <p class="text-muted">Get detailed soil composition, pH, and nutrient recommendations.</p>
+                </div>
+                <div class="feature-item mb-3">
+                    <h5><i class="bi bi-check-circle-fill text-success me-2"></i>Crop Health Monitoring</h5>
+                    <p class="text-muted">Real-time health scores based on satellite and sensor data.</p>
+                </div>
+                <div class="feature-item mb-3">
+                    <h5><i class="bi bi-check-circle-fill text-success me-2"></i>Yield Prediction</h5>
+                    <p class="text-muted">AI models to forecast crop yield with high accuracy.</p>
+                </div>
+                <a href="#" class="btn btn-success">Analyze Soil</a>
+            </div>
+            <div class="col-lg-6">
+                <img src="{{ url_for('static', filename='images/soil-health.jpg') }}"
+                     class="img-fluid rounded shadow" alt="Soil Health">
+            </div>
+        </div>
+
+        <!-- New Section: Farm Management Tools -->
+        <div class="row align-items-center mb-5">
+            <div class="col-lg-6">
+                <h2 class="fw-bold mb-4">📋 Farm Management</h2>
+                <div class="feature-item mb-3">
+                    <h5><i class="bi bi-check-circle-fill text-success me-2"></i>Task Manager</h5>
+                    <p class="text-muted">Organize daily farm tasks, set reminders, and track progress.</p>
+                </div>
+                <div class="feature-item mb-3">
+                    <h5><i class="bi bi-check-circle-fill text-success me-2"></i>Expense Tracker</h5>
+                    <p class="text-muted">Monitor costs, profits, and generate financial reports.</p>
+                </div>
+                <div class="feature-item mb-3">
+                    <h5><i class="bi bi-check-circle-fill text-success me-2"></i>Harvest Log</h5>
+                    <p class="text-muted">Record harvest quantities, quality, and storage details.</p>
+                </div>
+                <a href="#" class="btn btn-primary">Manage Farm</a>
+            </div>
+            <div class="col-lg-6">
+                <img src="{{ url_for('static', filename='images/farm-management.jpg') }}"
+                     class="img-fluid rounded shadow" alt="Farm Management">
+            </div>
+        </div>
+
+        <!-- New Section: Community & Support -->
+        <div class="row align-items-center mb-5 flex-lg-row-reverse">
+            <div class="col-lg-6">
+                <h2 class="fw-bold mb-4">👥 Community & Support</h2>
+                <div class="feature-item mb-3">
+                    <h5><i class="bi bi-check-circle-fill text-success me-2"></i>Farmer Forum</h5>
+                    <p class="text-muted">Connect with farmers worldwide, share experiences and tips.</p>
+                </div>
+                <div class="feature-item mb-3">
+                    <h5><i class="bi bi-check-circle-fill text-success me-2"></i>Expert Consultation</h5>
+                    <p class="text-muted">Book one-on-one sessions with agronomists and veterinarians.</p>
+                </div>
+                <div class="feature-item mb-3">
+                    <h5><i class="bi bi-check-circle-fill text-success me-2"></i>Knowledge Base</h5>
+                    <p class="text-muted">Access articles, guides, and best practices for farming.</p>
+                </div>
+                <a href="#" class="btn btn-warning">Join Community</a>
+            </div>
+            <div class="col-lg-6">
+                <img src="{{ url_for('static', filename='images/community.jpg') }}"
+                     class="img-fluid rounded shadow" alt="Community">
+            </div>
+        </div>
+
+        <!-- Additional Features Grid (Enhanced with colors) -->
+        <div class="row mb-5">
+            <div class="col-12 text-center mb-5">
+                <h2 class="fw-bold text-gradient">More Powerful Tools</h2>
+                <p class="text-muted">Complete farming management suite</p>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card feature-card h-100 border-0 shadow-sm bg-soft-primary">
+                    <div class="card-body p-4 text-center">
+                        <div class="icon-circle bg-primary text-white mx-auto">
+                            <i class="bi bi-cloud-sun-fill"></i>
+                        </div>
+                        <h4 class="text-primary">Weather Forecast</h4>
+                        <p class="text-muted">Hyper-local weather predictions and farming alerts.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card feature-card h-100 border-0 shadow-sm bg-soft-danger">
+                    <div class="card-body p-4 text-center">
+                        <div class="icon-circle bg-danger text-white mx-auto">
+                            <i class="bi bi-calendar-check-fill"></i>
+                        </div>
+                        <h4 class="text-danger">Crop Planner</h4>
+                        <p class="text-muted">Optimized planting/harvesting schedules for maximum yield.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card feature-card h-100 border-0 shadow-sm bg-soft-secondary">
+                    <div class="card-body p-4 text-center">
+                        <div class="icon-circle bg-secondary text-white mx-auto">
+                            <i class="bi bi-bug-fill"></i>
+                        </div>
+                        <h4 class="text-secondary">Pest Database</h4>
+                        <p class="text-muted">Comprehensive database of pests, diseases, and treatments.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add three more colorful cards -->
+            <div class="col-md-4 mb-4">
+                <div class="card feature-card h-100 border-0 shadow-sm bg-soft-success">
+                    <div class="card-body p-4 text-center">
+                        <div class="icon-circle bg-success text-white mx-auto">
+                            <i class="bi bi-droplet-fill"></i>
+                        </div>
+                        <h4 class="text-success">Irrigation Advisor</h4>
+                        <p class="text-muted">Smart irrigation schedules based on soil moisture and weather.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card feature-card h-100 border-0 shadow-sm bg-soft-warning">
+                    <div class="card-body p-4 text-center">
+                        <div class="icon-circle bg-warning text-white mx-auto">
+                            <i class="bi bi-truck"></i>
+                        </div>
+                        <h4 class="text-warning">Logistics Hub</h4>
+                        <p class="text-muted">Connect with transporters and optimize delivery routes.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-4">
+                <div class="card feature-card h-100 border-0 shadow-sm bg-soft-info">
+                    <div class="card-body p-4 text-center">
+                        <div class="icon-circle bg-info text-white mx-auto">
+                            <i class="bi bi-newspaper"></i>
+                        </div>
+                        <h4 class="text-info">News & Alerts</h4>
+                        <p class="text-muted">Latest agricultural news, government schemes, and alerts.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature Comparison (kept original) -->
+        <div class="row">
+            <div class="col-12">
+                <h2 class="text-center mb-4">Choose Your Plan</h2>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-success">
+                            <tr>
+                                <th>Feature</th>
+                                <th>Free</th>
+                                <th>Pro</th>
+                                <th>Enterprise</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>AI Chat Queries</td>
+                                <td>50/day</td>
+                                <td>Unlimited</td>
+                                <td>Unlimited</td>
+                            </tr>
+                            <tr>
+                                <td>Image Analysis</td>
+                                <td>20/month</td>
+                                <td>100/month</td>
+                                <td>Unlimited</td>
+                            </tr>
+                            <tr>
+                                <td>Market Data</td>
+                                <td>Basic</td>
+                                <td>Advanced</td>
+                                <td>Real-time API</td>
+                            </tr>
+                            <tr>
+                                <td>Weather Forecast</td>
+                                <td><i class="bi bi-check text-success"></i></td>
+                                <td><i class="bi bi-check text-success"></i></td>
+                                <td><i class="bi bi-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td>Crop Planning</td>
+                                <td>Basic</td>
+                                <td><i class="bi bi-check text-success"></i></td>
+                                <td><i class="bi bi-check text-success"></i></td>
+                            </tr>
+                            <tr>
+                                <td>Document Storage</td>
+                                <td>100MB</td>
+                                <td>5GB</td>
+                                <td>Unlimited</td>
+                            </tr>
+                            <tr>
+                                <td>Priority Support</td>
+                                <td>-</td>
+                                <td><i class="bi bi-check text-success"></i></td>
+                                <td>24/7 Dedicated</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section with gradient -->
+<section class="py-5" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+    <div class="container text-center py-5">
+        <h2 class="display-5 fw-bold mb-4 text-gradient">Ready to Experience Smart Farming?</h2>
+        <p class="lead mb-4">Start with our free plan, no credit card required</p>
+        {% if not current_user.is_authenticated %}
+        <a href="{{ url_for('register') }}" class="btn btn-gradient btn-lg px-5">Get Started Free</a>
+        {% else %}
+        <a href="{{ url_for('dashboard') }}" class="btn btn-gradient btn-lg px-5">Go to Dashboard</a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

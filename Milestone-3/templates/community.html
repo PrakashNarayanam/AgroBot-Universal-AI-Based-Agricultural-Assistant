@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header with stats -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2 class="mb-3">🌾 Farmer Community</h2>
+            <div class="d-flex flex-wrap gap-3 text-muted">
+                <span><i class="bi bi-people-fill me-1"></i> {{ total_members }} Members</span>
+                <span><i class="bi bi-chat-fill me-1"></i> {{ total_discussions }} Discussions</span>
+                <span><i class="bi bi-check-circle-fill me-1"></i> {{ total_solutions }} Solutions</span>
+                <span><i class="bi bi-award-fill me-1"></i> Your contributions: {{ user_contributions }}</span>
+                <span><i class="bi bi-circle-fill text-success me-1"></i> {{ online_members }} online</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories row -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h5 class="mb-3">📂 Categories</h5>
+            <div class="row g-3">
+                {% for cat in categories %}
+                <div class="col-md-4 col-lg-3">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center">
+                            <i class="bi {{ cat.icon }} fs-1 text-{{ cat.color }}"></i>
+                            <h6 class="mt-2">{{ cat.name }}</h6>
+                            <p class="small text-muted">{{ cat.thread_count }} threads</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- New Thread Button & Search -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newThreadModal">
+            <i class="bi bi-plus-lg me-1"></i>Start New Discussion
+        </button>
+        <form class="d-flex" action="{{ url_for('search_threads') }}" method="get">
+            <input class="form-control me-2" type="search" name="q" placeholder="Search threads..." aria-label="Search">
+            <button class="btn btn-outline-success" type="submit"><i class="bi bi-search"></i></button>
+        </form>
+    </div>
+
+    <!-- Recent Threads -->
+    <div class="row">
+        <div class="col-lg-8">
+            <h5 class="mb-3">📌 Recent Discussions</h5>
+            {% for thread in recent_threads %}
+            <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <h6>
+                            {% if thread.is_pinned %}<i class="bi bi-pin-fill text-warning me-1"></i>{% endif %}
+                            <a href="{{ url_for('view_thread', thread_id=thread.id) }}" class="text-decoration-none">
+                                {{ thread.title }}
+                            </a>
+                        </h6>
+                        <small class="text-muted">{{ thread.category.name }}</small>
+                    </div>
+                    <p class="text-muted small mb-2">{{ thread.content | truncate(150) }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge bg-light text-dark me-2"><i class="bi bi-person-circle me-1"></i>{{ thread.user.name }}</span>
+                            <span class="badge bg-light text-dark me-2"><i class="bi bi-clock me-1"></i>{{ thread.created_at | timeago }}</span>
+                            <span class="badge bg-light text-dark"><i class="bi bi-chat me-1"></i>{{ thread.posts|length }} replies</span>
+                        </div>
+                        <div>
+                            <span class="badge bg-secondary"><i class="bi bi-eye me-1"></i>{{ thread.views }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <p class="text-muted">No discussions yet. Be the first to start!</p>
+            {% endfor %}
+        </div>
+
+        <!-- Sidebar: Trending Tags & Top Contributors -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0"><i class="bi bi-tag-fill me-2"></i>Trending Topics</h6>
+                </div>
+                <div class="card-body">
+                    {% for tag, count in trending_tags %}
+                    <span class="badge bg-light text-dark me-2 mb-2 p-2">#{{ tag }} ({{ count }})</span>
+                    {% else %}
+                    <span class="text-muted">No trending tags</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0"><i class="bi bi-trophy-fill me-2 text-warning"></i>Top Contributors</h6>
+                </div>
+                <div class="card-body p-0">
+                    <ul class="list-group list-group-flush">
+                        {% for user, post_count in top_contributors %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-person-circle me-2"></i>{{ user.name }}</span>
+                            <span class="badge bg-success rounded-pill">{{ post_count }} posts</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for New Thread -->
+    <div class="modal fade" id="newThreadModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form method="post" action="{{ url_for('create_thread') }}">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Start a New Discussion</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Category</label>
+                            <select class="form-select" name="category_id" required>
+                                <option value="">Select category...</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Title</label>
+                            <input type="text" class="form-control" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Content</label>
+                            <textarea class="form-control" name="content" rows="5" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tags (comma separated)</label>
+                            <input type="text" class="form-control" name="tags" placeholder="e.g. pest, irrigation">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Post Discussion</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

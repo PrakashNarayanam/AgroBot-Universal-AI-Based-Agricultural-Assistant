@@ -1,0 +1,830 @@
+{% extends "base.html" %}
+
+{% block title %}Documents - AI-AgroBot{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Keep your existing CSS – unchanged */
+.doc-card { border-radius: 15px; transition: transform 0.3s ease; border: none; }
+.doc-card:hover { transform: translateY(-5px); }
+.doc-icon { width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+.file-upload-area { border: 2px dashed #dee2e6; border-radius: 15px; padding: 40px 20px; text-align: center; transition: all 0.3s ease; background-color: #f8f9fa; }
+.file-upload-area:hover { border-color: #198754; background-color: #e8f5e8; }
+.doc-preview { width: 80px; height: 80px; object-fit: cover; border-radius: 10px; }
+.doc-actions { opacity: 0; transition: opacity 0.3s ease; }
+.doc-card:hover .doc-actions { opacity: 1; }
+.file-type-badge { position: absolute; top: 10px; right: 10px; }
+.category-badge { cursor: pointer; transition: all 0.3s ease; }
+.category-badge.active { background-color: #198754; color: white; }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- CSRF token for AJAX (if using Flask-WTF) -->
+<meta name="csrf-token" content="{{ csrf_token() if csrf_token else '' }}">
+
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-success text-black">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="display-5 fw-bold mb-3">Document Center</h1>
+                            <p class="lead mb-0">Upload, manage, and access all your farming documents in one place</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <div class="display-6 mb-2" id="totalStorage">0 GB</div>
+                            <small id="storageDetails">Storage used (0% of 8GB)</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Total Files</h6>
+                            <h4 class="mb-0" id="totalFiles">0</h4>
+                            <small>Documents & images</small>
+                        </div>
+                        <div class="doc-icon bg-success bg-opacity-10 text-success">
+                            <i class="bi bi-folder-fill fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">This Month</h6>
+                            <h4 class="mb-0" id="monthlyUploads">0</h4>
+                            <small>New uploads</small>
+                        </div>
+                        <div class="doc-icon bg-info bg-opacity-10 text-info">
+                            <i class="bi bi-cloud-arrow-up-fill fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Shared</h6>
+                            <h4 class="mb-0">8</h4>
+                            <small>Documents shared</small>
+                        </div>
+                        <div class="doc-icon bg-warning bg-opacity-10 text-warning">
+                            <i class="bi bi-share-fill fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Storage</h6>
+                            <h4 class="mb-0" id="storagePercent">0%</h4>
+                            <small id="storageUsed">0 GB of 8 GB</small>
+                        </div>
+                        <div class="doc-icon bg-primary bg-opacity-10 text-primary">
+                            <i class="bi bi-hdd-fill fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Upload Documents</h5>
+                </div>
+                <div class="card-body">
+                    <div class="file-upload-area" id="uploadArea">
+                        <i class="bi bi-cloud-arrow-up display-4 text-muted mb-3"></i>
+                        <h5 class="mb-3">Drag & drop files here</h5>
+                        <p class="text-muted mb-3">or click to browse</p>
+                        <input type="file" id="fileUpload" multiple class="d-none">
+                        <label for="fileUpload" class="btn btn-success btn-lg">
+                            <i class="bi bi-upload me-2"></i>Choose Files
+                        </label>
+                        <p class="small text-muted mt-3">
+                            Supports: PDF, DOC, DOCX, XLS, XLSX, JPG, PNG (Max 10MB each)
+                        </p>
+                    </div>
+
+                    <div class="progress mt-3 d-none" id="uploadProgress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated"
+                             style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories & Filter -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge category-badge active" data-category="all">All Files</span>
+                                <span class="badge category-badge" data-category="images">Images</span>
+                                <span class="badge category-badge" data-category="pdf">PDF</span>
+                                <span class="badge category-badge" data-category="docs">Documents</span>
+                                <span class="badge category-badge" data-category="spreadsheets">Spreadsheets</span>
+                                <span class="badge category-badge" data-category="reports">Reports</span>
+                                <span class="badge category-badge" data-category="certificates">Certificates</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" class="form-control" placeholder="Search documents..." id="docSearch">
+                                <button class="btn btn-success" type="button" id="searchBtn">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row">
+        <!-- Document Grid -->
+        <div class="col-lg-8">
+            <div class="row" id="docGrid">
+                <!-- Document cards will be loaded here -->
+            </div>
+
+            <!-- Empty State -->
+            <div class="text-center py-5 d-none" id="emptyState">
+                <i class="bi bi-folder-x display-1 text-muted mb-3"></i>
+                <h4>No documents yet</h4>
+                <p class="text-muted mb-4">Upload your first document to get started</p>
+                <label for="fileUpload" class="btn btn-success">
+                    <i class="bi bi-upload me-2"></i>Upload First Document
+                </label>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- Recent Uploads -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Recent Uploads</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush" id="recentUploadsList">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Storage Usage -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Storage Usage</h5>
+                </div>
+                <div class="card-body" id="storageBreakdown">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-success">
+                            <i class="bi bi-folder-plus me-2"></i>Create Folder
+                        </button>
+                        <button class="btn btn-outline-success">
+                            <i class="bi bi-share me-2"></i>Share Documents
+                        </button>
+                        <button class="btn btn-outline-success">
+                            <i class="bi bi-download me-2"></i>Export All
+                        </button>
+                        <button class="btn btn-outline-danger">
+                            <i class="bi bi-trash me-2"></i>Empty Trash
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Categories -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Document Categories</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <div class="card doc-card border-success">
+                                <div class="card-body text-center">
+                                    <div class="doc-icon bg-success bg-opacity-10 text-success mx-auto mb-3">
+                                        <i class="bi bi-file-earmark-medical fs-2"></i>
+                                    </div>
+                                    <h5>Soil Reports</h5>
+                                    <p class="text-muted small">Soil test results and analysis</p>
+                                    <span class="badge bg-success" id="countSoil">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card doc-card border-info">
+                                <div class="card-body text-center">
+                                    <div class="doc-icon bg-info bg-opacity-10 text-info mx-auto mb-3">
+                                        <i class="bi bi-cash-coin fs-2"></i>
+                                    </div>
+                                    <h5>Financial Records</h5>
+                                    <p class="text-muted small">Invoices, bills, and receipts</p>
+                                    <span class="badge bg-info" id="countFinancial">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card doc-card border-warning">
+                                <div class="card-body text-center">
+                                    <div class="doc-icon bg-warning bg-opacity-10 text-warning mx-auto mb-3">
+                                        <i class="bi bi-file-earmark-text fs-2"></i>
+                                    </div>
+                                    <h5>Government Forms</h5>
+                                    <p class="text-muted small">Subsidy and scheme applications</p>
+                                    <span class="badge bg-warning" id="countGov">0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="card doc-card border-primary">
+                                <div class="card-body text-center">
+                                    <div class="doc-icon bg-primary bg-opacity-10 text-primary mx-auto mb-3">
+                                        <i class="bi bi-images fs-2"></i>
+                                    </div>
+                                    <h5>Crop Photos</h5>
+                                    <p class="text-muted small">Growth monitoring images</p>
+                                    <span class="badge bg-primary" id="countCrop">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Document Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="docTitle">Document Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="docPreview">
+                    <!-- Document preview will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" id="modalDownloadBtn">
+                    <i class="bi bi-download me-2"></i>Download
+                </button>
+                <button class="btn btn-outline-success" id="modalShareBtn">
+                    <i class="bi bi-share me-2"></i>Share
+                </button>
+                <button class="btn btn-success" id="modalViewFullBtn">
+                    <i class="bi bi-eye me-2"></i>View Full
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Share Modal -->
+<div class="modal fade" id="shareModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Share Document</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Share with</label>
+                    <input type="text" class="form-control" placeholder="Enter email addresses">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Permission</label>
+                    <select class="form-select">
+                        <option value="view">Can view</option>
+                        <option value="edit">Can edit</option>
+                        <option value="comment">Can comment</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Message (optional)</label>
+                    <textarea class="form-control" rows="3" placeholder="Add a message"></textarea>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="sendEmail">
+                    <label class="form-check-label" for="sendEmail">
+                        Send email notification
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success">Share Document</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Global variables
+    let documents = [];
+    let currentPreviewDoc = null;
+
+    // CSRF token handling for Flask (with Flask-WTF, token is in a cookie named 'csrf_token')
+    function getCSRFToken() {
+        // Try to get from meta tag first (if we set it)
+        const metaTag = document.querySelector('meta[name="csrf-token"]');
+        if (metaTag) return metaTag.getAttribute('content');
+        // Fallback: read from cookie (common with Flask-WTF)
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'csrf_token') return value;
+        }
+        return '';
+    }
+
+    // Load documents from server
+    function loadDocuments() {
+        $.getJSON('/documents/list/')
+            .done(function(data) {
+                documents = data;
+                renderDocumentGrid(documents);
+                updateStats(documents);
+                renderRecentUploads(documents);
+                renderStorageBreakdown(documents);
+            })
+            .fail(function() {
+                alert('Failed to load documents.');
+            });
+    }
+
+    // Render document grid (same as before)
+    function renderDocumentGrid(data) {
+        const grid = $('#docGrid');
+        const emptyState = $('#emptyState');
+
+        if (data.length === 0) {
+            grid.empty();
+            emptyState.removeClass('d-none');
+            return;
+        }
+
+        emptyState.addClass('d-none');
+        grid.empty();
+
+        data.forEach(doc => {
+            const icon = getFileIcon(doc.type);
+            const color = getFileColor(doc.type);
+
+            const card = `
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card doc-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="doc-icon ${color}">
+                                    <i class="${icon} fs-3"></i>
+                                </div>
+                                <span class="badge ${getCategoryBadge(doc.category)}">${doc.category}</span>
+                            </div>
+                            <h6 class="card-title mb-2">${doc.name}</h6>
+                            <p class="card-text small text-muted mb-3">${doc.description || ''}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted d-block">${doc.size}</small>
+                                    <small class="text-muted">${doc.date}</small>
+                                </div>
+                                <div class="doc-actions">
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-success preview-doc" data-id="${doc.id}">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <a href="/documents/download/${doc.id}/" class="btn btn-outline-success">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+                                        <button class="btn btn-outline-success share-doc" data-id="${doc.id}">
+                                            <i class="bi bi-share"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            grid.append(card);
+        });
+    }
+
+    // File type helper functions (unchanged)
+    function getFileIcon(type) {
+        const icons = {
+            'pdf': 'bi bi-file-earmark-pdf-fill',
+            'docs': 'bi bi-file-earmark-word-fill',
+            'spreadsheet': 'bi bi-file-earmark-excel-fill',
+            'archive': 'bi bi-file-earmark-zip-fill',
+            'image': 'bi bi-file-earmark-image-fill',
+            'jpg': 'bi bi-file-earmark-image-fill',
+            'jpeg': 'bi bi-file-earmark-image-fill',
+            'png': 'bi bi-file-earmark-image-fill',
+            'gif': 'bi bi-file-earmark-image-fill'
+        };
+        return icons[type] || 'bi bi-file-earmark-fill';
+    }
+
+    function getFileColor(type) {
+        const colors = {
+            'pdf': 'bg-danger bg-opacity-10 text-danger',
+            'docs': 'bg-primary bg-opacity-10 text-primary',
+            'spreadsheet': 'bg-success bg-opacity-10 text-success',
+            'archive': 'bg-warning bg-opacity-10 text-warning',
+            'image': 'bg-info bg-opacity-10 text-info',
+            'jpg': 'bg-info bg-opacity-10 text-info',
+            'jpeg': 'bg-info bg-opacity-10 text-info',
+            'png': 'bg-info bg-opacity-10 text-info'
+        };
+        return colors[type] || 'bg-secondary bg-opacity-10 text-secondary';
+    }
+
+    function getCategoryBadge(category) {
+        const badges = {
+            'reports': 'bg-success',
+            'images': 'bg-info',
+            'financial': 'bg-warning',
+            'certificates': 'bg-primary',
+            'uploads': 'bg-secondary'
+        };
+        return badges[category] || 'bg-secondary';
+    }
+
+    // Update statistics (unchanged)
+    function updateStats(docs) {
+        const totalFiles = docs.length;
+        $('#totalFiles').text(totalFiles);
+
+        let totalBytes = 0;
+        docs.forEach(doc => {
+            const sizeStr = doc.size;
+            const num = parseFloat(sizeStr);
+            if (sizeStr.includes('GB')) totalBytes += num * 1024 * 1024 * 1024;
+            else if (sizeStr.includes('MB')) totalBytes += num * 1024 * 1024;
+            else if (sizeStr.includes('KB')) totalBytes += num * 1024;
+            else totalBytes += num;
+        });
+        const totalGB = (totalBytes / (1024 * 1024 * 1024)).toFixed(2);
+        $('#totalStorage').text(totalGB + ' GB');
+        const percent = Math.min(100, Math.round((totalBytes / (8 * 1024 * 1024 * 1024)) * 100));
+        $('#storagePercent').text(percent + '%');
+        $('#storageUsed').text(totalGB + ' GB of 8 GB');
+        $('#storageDetails').text(`Storage used (${percent}% of 8GB)`);
+
+        const now = new Date();
+        const currentMonth = now.getMonth() + 1;
+        const currentYear = now.getFullYear();
+        const monthly = docs.filter(doc => {
+            const docDate = new Date(doc.date);
+            return docDate.getMonth() + 1 === currentMonth && docDate.getFullYear() === currentYear;
+        }).length;
+        $('#monthlyUploads').text(monthly);
+
+        $('#countSoil').text(docs.filter(d => d.category === 'reports').length);
+        $('#countFinancial').text(docs.filter(d => d.category === 'financial').length);
+        $('#countGov').text(docs.filter(d => d.category === 'certificates').length);
+        $('#countCrop').text(docs.filter(d => d.category === 'images').length);
+    }
+
+    // Render recent uploads (unchanged)
+    function renderRecentUploads(docs) {
+        const recent = docs.slice(0, 5);
+        const list = $('#recentUploadsList');
+        list.empty();
+        recent.forEach(doc => {
+            const item = `
+                <div class="list-group-item px-0">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <div class="doc-icon bg-light text-dark">
+                                <i class="${getFileIcon(doc.type)} fs-4"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">${doc.name}</h6>
+                            <small class="text-muted">${doc.size} • ${timeAgo(doc.date)}</small>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/documents/download/${doc.id}/"><i class="bi bi-download me-2"></i>Download</a></li>
+                                <li><a class="dropdown-item share-doc" href="#" data-id="${doc.id}"><i class="bi bi-share me-2"></i>Share</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-trash me-2"></i>Delete</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+            list.append(item);
+        });
+    }
+
+    function timeAgo(dateStr) {
+        const date = new Date(dateStr);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+        if (diffHrs < 24) return diffHrs + ' hours ago';
+        const diffDays = Math.floor(diffHrs / 24);
+        return diffDays + ' days ago';
+    }
+
+    // Render storage breakdown (unchanged)
+    function renderStorageBreakdown(docs) {
+        let imageBytes = 0, pdfBytes = 0, otherBytes = 0;
+        docs.forEach(doc => {
+            const sizeStr = doc.size;
+            let bytes = 0;
+            const num = parseFloat(sizeStr);
+            if (sizeStr.includes('GB')) bytes = num * 1024 * 1024 * 1024;
+            else if (sizeStr.includes('MB')) bytes = num * 1024 * 1024;
+            else if (sizeStr.includes('KB')) bytes = num * 1024;
+            else bytes = num;
+
+            if (doc.type === 'image' || doc.type.match(/jpg|jpeg|png|gif/)) imageBytes += bytes;
+            else if (doc.type === 'pdf') pdfBytes += bytes;
+            else otherBytes += bytes;
+        });
+
+        const total = imageBytes + pdfBytes + otherBytes;
+        const imagePercent = total ? (imageBytes / total * 100).toFixed(1) : 0;
+        const pdfPercent = total ? (pdfBytes / total * 100).toFixed(1) : 0;
+        const otherPercent = total ? (otherBytes / total * 100).toFixed(1) : 0;
+
+        const html = `
+            <div class="mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                    <span>Images</span>
+                    <span class="fw-bold">${(imageBytes / (1024*1024*1024)).toFixed(2)} GB</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar bg-success" style="width: ${imagePercent}%"></div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                    <span>PDF Documents</span>
+                    <span class="fw-bold">${(pdfBytes / (1024*1024*1024)).toFixed(2)} GB</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar bg-info" style="width: ${pdfPercent}%"></div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                    <span>Other Files</span>
+                    <span class="fw-bold">${(otherBytes / (1024*1024*1024)).toFixed(2)} GB</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar bg-warning" style="width: ${otherPercent}%"></div>
+                </div>
+            </div>
+        `;
+        $('#storageBreakdown').html(html);
+    }
+
+    // Category filter
+    $('.category-badge').click(function() {
+        $('.category-badge').removeClass('active');
+        $(this).addClass('active');
+
+        const category = $(this).data('category');
+        let filteredDocs = documents;
+
+        if (category !== 'all') {
+            const catMap = {
+                'images': 'images',
+                'pdf': 'pdf',
+                'docs': 'docs',
+                'spreadsheets': 'spreadsheet',
+                'reports': 'reports',
+                'certificates': 'certificates'
+            };
+            const serverCat = catMap[category];
+            filteredDocs = documents.filter(doc => doc.type === serverCat || doc.category === serverCat);
+        }
+
+        renderDocumentGrid(filteredDocs);
+    });
+
+    // Search
+    $('#docSearch').on('input', function() {
+        const searchTerm = $(this).val().toLowerCase();
+        if (searchTerm.length > 0) {
+            const filteredDocs = documents.filter(doc =>
+                doc.name.toLowerCase().includes(searchTerm) ||
+                (doc.description && doc.description.toLowerCase().includes(searchTerm))
+            );
+            renderDocumentGrid(filteredDocs);
+        } else {
+            renderDocumentGrid(documents);
+        }
+    });
+
+    // File upload handling
+    $('#fileUpload').change(function(e) {
+        const files = e.target.files;
+        if (files.length > 0) {
+            uploadFiles(files);
+        }
+    });
+
+    // Drag and drop
+    const uploadArea = $('#uploadArea');
+    uploadArea.on('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.css('border-color', '#198754');
+        uploadArea.css('background-color', '#e8f5e8');
+    });
+
+    uploadArea.on('dragleave', function() {
+        uploadArea.css('border-color', '#dee2e6');
+        uploadArea.css('background-color', '#f8f9fa');
+    });
+
+    uploadArea.on('drop', function(e) {
+        e.preventDefault();
+        uploadArea.css('border-color', '#dee2e6');
+        uploadArea.css('background-color', '#f8f9fa');
+
+        const files = e.originalEvent.dataTransfer.files;
+        if (files.length > 0) {
+            uploadFiles(files);
+        }
+    });
+
+    // Real upload function with CSRF token
+    function uploadFiles(files) {
+        const progressBar = $('#uploadProgress');
+        progressBar.removeClass('d-none');
+        progressBar.find('.progress-bar').css('width', '0%');
+
+        const formData = new FormData();
+        for (let i = 0; i < files.length; i++) {
+            formData.append('file', files[i]);
+        }
+        formData.append('description', 'Uploaded via document center');
+        formData.append('category', 'uploads');
+
+        $.ajax({
+            url: '/documents/upload/',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: { 'X-CSRFToken': getCSRFToken() },
+            xhr: function() {
+                const xhr = new window.XMLHttpRequest();
+                xhr.upload.addEventListener('progress', function(e) {
+                    if (e.lengthComputable) {
+                        const percent = Math.round((e.loaded / e.total) * 100);
+                        progressBar.find('.progress-bar').css('width', percent + '%');
+                    }
+                }, false);
+                return xhr;
+            },
+            success: function(response) {
+                progressBar.find('.progress-bar').css('width', '100%');
+                setTimeout(() => {
+                    progressBar.addClass('d-none');
+                    progressBar.find('.progress-bar').css('width', '0%');
+                    alert('Files uploaded successfully!');
+                    loadDocuments(); // Refresh the list
+                }, 500);
+            },
+            error: function(xhr, status, error) {
+                alert('Upload failed: ' + error);
+                progressBar.addClass('d-none');
+            }
+        });
+    }
+
+    // Preview document
+    $(document).on('click', '.preview-doc', function() {
+        const docId = $(this).data('id');
+        const doc = documents.find(d => d.id == docId);
+        if (!doc) return;
+        currentPreviewDoc = doc;
+
+        $('#docTitle').text(doc.name);
+        const fileExt = doc.name.split('.').pop().toLowerCase();
+        let previewHtml = '';
+
+        if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExt)) {
+            previewHtml = `<img src="${doc.url}" class="img-fluid" alt="${doc.name}">`;
+        } else if (fileExt === 'pdf') {
+            previewHtml = `<iframe src="${doc.url}" width="100%" height="500px"></iframe>`;
+        } else {
+            previewHtml = `
+                <div class="text-center py-5">
+                    <i class="${getFileIcon(doc.type)} display-1 ${getFileColor(doc.type).split(' ')[2]} mb-3"></i>
+                    <h5>${doc.name}</h5>
+                    <p class="text-muted">${doc.description || ''}</p>
+                    <div class="row text-center mt-4">
+                        <div class="col-4">
+                            <small class="text-muted d-block">Type</small>
+                            <strong>${doc.type.toUpperCase()}</strong>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted d-block">Size</small>
+                            <strong>${doc.size}</strong>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted d-block">Date</small>
+                            <strong>${doc.date}</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        $('#docPreview').html(previewHtml);
+        $('#modalDownloadBtn').off('click').on('click', function() {
+            window.location.href = `/documents/download/${doc.id}/`;
+        });
+        $('#modalShareBtn').off('click').on('click', function() {
+            $('#shareModal').modal('show');
+        });
+        $('#modalViewFullBtn').off('click').on('click', function() {
+            window.open(doc.url, '_blank');
+        });
+        $('#previewModal').modal('show');
+    });
+
+    // Share document
+    $(document).on('click', '.share-doc', function() {
+        const docId = $(this).data('id');
+        $('#shareModal').modal('show');
+    });
+
+    // Initialize
+    loadDocuments();
+});
+</script>
+{% endblock %}

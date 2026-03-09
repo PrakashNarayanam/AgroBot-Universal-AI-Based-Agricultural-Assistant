@@ -1,0 +1,890 @@
+{% extends "base.html" %}
+
+{% block title %}Login - AI-AgroBot{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --agro-primary: #1a7f3a;
+        --agro-secondary: #34c759;
+        --agro-light: #e8f5e9;
+        --agro-dark: #0d5c2a;
+        --agro-warning: #ff9500;
+        --agro-info: #17a2b8;
+        --agro-gradient: linear-gradient(135deg, #1a7f3a 0%, #34c759 100%);
+        --agro-gradient-light: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+    }
+
+    .login-container {
+        background: var(--agro-gradient-light);
+        min-height: 100vh;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .login-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 300px;
+        background: var(--agro-gradient);
+        clip-path: polygon(0 0, 100% 0, 100% 80%, 0 100%);
+        z-index: 0;
+    }
+
+    .login-card {
+        position: relative;
+        z-index: 1;
+        border: none;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(26, 127, 58, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+    }
+
+    .login-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(26, 127, 58, 0.2);
+    }
+
+    .card-header {
+        background: var(--agro-gradient) !important;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .card-header::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 1%, transparent 20%);
+        transform: rotate(30deg);
+    }
+
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        transition: all 0.3s ease;
+    }
+
+    .feature-icon:hover {
+        transform: rotate(10deg) scale(1.1);
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .input-group {
+        border-radius: 10px;
+        overflow: hidden;
+        border: 2px solid #e0e0e0;
+        transition: all 0.3s ease;
+    }
+
+    .input-group:focus-within {
+        border-color: var(--agro-secondary);
+        box-shadow: 0 0 0 0.25rem rgba(52, 199, 89, 0.25);
+    }
+
+    .input-group-text {
+        background: var(--agro-light);
+        border: none;
+        color: var(--agro-primary);
+    }
+
+    .form-control {
+        border: none;
+        padding: 15px;
+        background: transparent;
+    }
+
+    .form-control:focus {
+        box-shadow: none;
+        background: transparent;
+    }
+
+    .btn-login {
+        background: var(--agro-gradient);
+        border: none;
+        border-radius: 10px;
+        padding: 15px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-login::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .btn-login:hover::after {
+        left: 100%;
+    }
+
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(26, 127, 58, 0.3);
+    }
+
+    .social-btn {
+        border-radius: 10px;
+        padding: 12px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: 2px solid;
+    }
+
+    .social-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .demo-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 2px dashed var(--agro-primary);
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .demo-card::before {
+        content: 'DEMO';
+        position: absolute;
+        top: 10px;
+        right: -30px;
+        background: var(--agro-warning);
+        color: white;
+        padding: 2px 30px;
+        transform: rotate(45deg);
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .demo-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(26, 127, 58, 0.15);
+        border-color: var(--agro-secondary);
+    }
+
+    .floating-icons {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .floating-icon {
+        position: absolute;
+        font-size: 24px;
+        color: rgba(26, 127, 58, 0.1);
+        animation: float 20s infinite linear;
+    }
+
+    @keyframes float {
+        0% { transform: translateY(0) rotate(0deg); }
+        100% { transform: translateY(-1000px) rotate(360deg); }
+    }
+
+    .stats-counter {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .stats-counter h5 {
+        color: var(--agro-primary);
+        font-weight: 600;
+    }
+
+    .feature-badge {
+        background: var(--agro-gradient);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-left: 10px;
+    }
+
+    .pulse {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    .language-selector {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 2;
+    }
+
+    .theme-toggle {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 2;
+    }
+
+    .quick-features {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-top: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .feature-item:hover {
+        background: var(--agro-light);
+        transform: translateX(5px);
+    }
+
+    .feature-item i {
+        font-size: 20px;
+        color: var(--agro-primary);
+        margin-right: 15px;
+        width: 40px;
+        height: 40px;
+        background: var(--agro-light);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dark-mode {
+        background: #1a1a1a !important;
+        color: #ffffff !important;
+    }
+
+    .dark-mode .login-card {
+        background: rgba(40, 40, 40, 0.95);
+        color: #ffffff;
+    }
+
+    .dark-mode .form-control {
+        background: #2d2d2d;
+        color: #ffffff;
+        border: 1px solid #404040;
+    }
+
+    .dark-mode .input-group-text {
+        background: #2d2d2d;
+        color: #ffffff;
+        border-color: #404040;
+    }
+
+    .dark-mode .quick-features {
+        background: #2d2d2d;
+        color: #ffffff;
+    }
+
+    .dark-mode .stats-counter {
+        background: #2d2d2d;
+        color: #ffffff;
+    }
+
+    .dark-mode .feature-item:hover {
+        background: #3d3d3d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="floating-icons">
+        {% for i in range(1, 21) %}
+        <div class="floating-icon" style="
+            left: {{ (i * 5) }}%;
+            animation-delay: {{ i }}s;
+            animation-duration: {{ [15, 20, 25, 30]|random }}s;
+        ">
+            <i class="bi bi-{% if i % 5 == 0 %}tree{% elif i % 5 == 1 %}seed{% elif i % 5 == 2 %}droplet{% elif i % 5 == 3 %}sun{% else %}flower{% endif %}"></i>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <select class="form-select form-select-sm" style="width: auto; border-radius: 20px; border-color: var(--agro-primary);">
+            <option selected>English</option>
+            <option>हिन्दी</option>
+            <option>தமிழ்</option>
+            <option>తెలుగు</option>
+            <option>മലയാളം</option>
+            <option>বাংলা</option>
+        </select>
+    </div>
+
+    <!-- Theme Toggle -->
+    <div class="theme-toggle">
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-sm btn-outline-success active theme-light">
+                <i class="bi bi-sun"></i>
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-success theme-dark">
+                <i class="bi bi-moon"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <div class="row justify-content-center align-items-center">
+            <!-- Left Column - Features -->
+            <div class="col-lg-5 col-md-6 mb-5 mb-lg-0">
+                <div class="quick-features animate__animated animate__fadeInLeft">
+                    <h4 class="mb-4 text-center" style="color: var(--agro-primary);">
+                        <i class="bi bi-stars me-2"></i>AI-AgroBot Features
+                    </h4>
+
+                    <div class="feature-item">
+                        <i class="bi bi-chat-dots"></i>
+                        <div>
+                            <h6 class="mb-1">Smart Chat Assistant</h6>
+                            <small class="text-muted">24/7 AI-powered farming advice</small>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="bi bi-camera"></i>
+                        <div>
+                            <h6 class="mb-1">Crop Disease Detection</h6>
+                            <small class="text-muted">Upload photos for instant analysis</small>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="bi bi-cloud-sun"></i>
+                        <div>
+                            <h6 class="mb-1">Weather Forecast</h6>
+                            <small class="text-muted">Personalized weather updates</small>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="bi bi-graph-up"></i>
+                        <div>
+                            <h6 class="mb-1">Market Prices</h6>
+                            <small class="text-muted">Real-time crop price tracking</small>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <i class="bi bi-calendar-check"></i>
+                        <div>
+                            <h6 class="mb-1">Crop Planner</h6>
+                            <small class="text-muted">Smart planting & harvesting schedule</small>
+                        </div>
+                    </div>
+
+                    <div class="stats-counter animate__animated animate__fadeInUp">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <h5 class="mb-0" id="farmersCount">0+</h5>
+                                <small class="text-muted">Farmers</small>
+                            </div>
+                            <div class="col-4">
+                                <h5 class="mb-0" id="queriesCount">0+</h5>
+                                <small class="text-muted">Queries</small>
+                            </div>
+                            <div class="col-4">
+                                <h5 class="mb-0" id="cropsCount">0+</h5>
+                                <small class="text-muted">Crops</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Login Form -->
+            <div class="col-lg-5 col-md-6">
+                <div class="login-card animate__animated animate__fadeInRight">
+                    <div class="card-header text-white py-4 pulse">
+                        <div class="text-center">
+                            <div class="feature-icon">
+                                <i class="bi bi-tree display-6"></i>
+                            </div>
+                            <h2 class="mb-2 fw-bold">Welcome Back!</h2>
+                            <p class="opacity-90 mb-0">Sign in to your smart farming assistant</p>
+                            <span class="badge bg-warning mt-2">AI-Powered Agriculture</span>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4 p-md-5">
+                        <!-- Progress Indicator -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between mb-2">
+                                <small>Step 1 of 2</small>
+                                <small>75% Complete</small>
+                            </div>
+                            <div class="progress" style="height: 6px; border-radius: 3px;">
+                                <div class="progress-bar" style="background: var(--agro-gradient); width: 75%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Flash Messages for Login Errors -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    {% if category in ['error', 'danger', 'login_error'] %}
+                                    <div class="alert alert-danger alert-dismissible fade show animate__animated animate__shakeX">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
+                        <form method="POST" action="{{ url_for('login') }}" id="loginForm" novalidate>
+                            <!-- CSRF Protection (if using Flask-WTF) -->
+                            {% if csrf_token %}
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            {% endif %}
+
+                            <div class="mb-4">
+                                <label for="email" class="form-label fw-bold">Email Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
+                                    <input type="email" class="form-control" id="email" name="email" required
+                                           placeholder="farmer@example.com"
+                                           value="{{ request.form.email if request.form else '' }}">
+                                    <span class="input-group-text" id="emailStatus"></span>
+                                </div>
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>Enter your registered email
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="password" class="form-label fw-bold">Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-shield-lock"></i></span>
+                                    <input type="password" class="form-control" id="password" name="password" required
+                                           placeholder="Enter your password">
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <div class="form-text">
+                                        <a href="#passwordRecovery" class="text-decoration-none" data-bs-toggle="modal">
+                                            <i class="bi bi-key me-1"></i>Forgot password?
+                                        </a>
+                                    </div>
+                                    <div class="form-text">
+                                        <span id="passwordStrength" class="badge bg-secondary">Weak</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="remember" name="remember" checked value="true">
+                                    <label class="form-check-label" for="remember">
+                                        <i class="bi bi-check-circle me-1"></i>Remember me for 30 days
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 mb-4">
+                                <button type="submit" class="btn btn-login btn-lg" id="loginSubmitBtn">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i>Secure Sign In
+                                </button>
+
+                                <div class="text-center mt-3">
+                                    <p class="mb-2">New to AI-AgroBot?
+                                        <a href="{{ url_for('register') }}" class="text-decoration-none fw-bold" style="color: var(--agro-primary);">
+                                            <i class="bi bi-person-plus me-1"></i>Create Free Account
+                                        </a>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="text-center mb-4">
+                                <div class="position-relative">
+                                    <hr>
+                                    <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted">
+                                        Or continue with
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-6">
+                                    <button type="button" class="btn btn-outline-primary w-100 social-btn">
+                                        <i class="bi bi-google me-2"></i> Google
+                                    </button>
+                                </div>
+                                <div class="col-6">
+                                    <button type="button" class="btn btn-outline-dark w-100 social-btn">
+                                        <i class="bi bi-facebook me-2"></i> Facebook
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="text-center">
+                                <small class="text-muted">
+                                    <i class="bi bi-lock-fill me-1"></i>
+                                    Your data is protected with 256-bit SSL encryption
+                                </small>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Demo Accounts -->
+                <div class="demo-card p-3 mt-4 animate__animated animate__fadeInUp">
+                    <h6 class="card-title mb-3">
+                        <i class="bi bi-rocket-takeoff me-2"></i>Quick Start Demo Accounts
+                    </h6>
+                    <div class="row g-2">
+                        <div class="col-12 col-sm-6">
+                            <div class="alert alert-success small mb-0 demo-account"
+                                 data-email="demo@aiagrobot.com"
+                                 data-password="demo123">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person-circle me-2"></i>
+                                    <div>
+                                        <strong class="d-block">Farmer Demo</strong>
+                                        <small class="text-muted">Basic features access</small>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <span class="badge bg-light text-dark">Email: demo@aiagrobot.com</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            <div class="alert alert-warning small mb-0 demo-account"
+                                 data-email="admin@aiagrobot.com"
+                                 data-password="admin123">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-shield-check me-2"></i>
+                                    <div>
+                                        <strong class="d-block">Admin Demo</strong>
+                                        <small class="text-muted">Full admin access</small>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <span class="badge bg-light text-dark">Email: admin@aiagrobot.com</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-center">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Click on any demo account to auto-fill credentials
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Password Recovery Modal -->
+<div class="modal fade" id="passwordRecovery" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="background: var(--agro-gradient); color: white;">
+                <h5 class="modal-title"><i class="bi bi-key me-2"></i>Password Recovery</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Enter your email address to receive password reset instructions.</p>
+                <div class="mb-3">
+                    <label for="recoveryEmail" class="form-label">Email Address</label>
+                    <input type="email" class="form-control" id="recoveryEmail" placeholder="your@email.com">
+                </div>
+                <div class="alert alert-info small">
+                    <i class="bi bi-info-circle me-2"></i>
+                    You'll receive an email with reset instructions within 5 minutes.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="sendResetEmail()">Send Reset Link</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Counter Animation
+    function animateCounter(elementId, target, duration = 2000) {
+        const element = document.getElementById(elementId);
+        const start = 0;
+        const increment = target / (duration / 16);
+        let current = start;
+
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+                element.textContent = target + "+";
+                clearInterval(timer);
+            } else {
+                element.textContent = Math.floor(current) + "+";
+            }
+        }, 16);
+    }
+
+    // Start counters with animation
+    setTimeout(() => {
+        animateCounter('farmersCount', 5000);
+        animateCounter('queriesCount', 25000);
+        animateCounter('cropsCount', 50);
+    }, 1000);
+
+    // Toggle password visibility
+    $('#togglePassword').click(function() {
+        const passwordInput = $('#password');
+        const icon = $(this).find('i');
+
+        if (passwordInput.attr('type') === 'password') {
+            passwordInput.attr('type', 'text');
+            icon.removeClass('bi-eye').addClass('bi-eye-slash');
+            $(this).addClass('btn-success').removeClass('btn-outline-secondary');
+        } else {
+            passwordInput.attr('type', 'password');
+            icon.removeClass('bi-eye-slash').addClass('bi-eye');
+            $(this).removeClass('btn-success').addClass('btn-outline-secondary');
+        }
+    });
+
+    // Password strength indicator
+    $('#password').on('input', function() {
+        const password = $(this).val();
+        let strength = 'Weak';
+        let color = 'bg-danger';
+
+        if (password.length >= 12 && /[A-Z]/.test(password) && /[0-9]/.test(password) && /[^A-Za-z0-9]/.test(password)) {
+            strength = 'Strong';
+            color = 'bg-success';
+        } else if (password.length >= 8) {
+            strength = 'Medium';
+            color = 'bg-warning';
+        }
+
+        $('#passwordStrength').text(strength).removeClass('bg-danger bg-warning bg-success').addClass(color);
+    });
+
+    // Email validation
+    $('#email').on('blur', function() {
+        const email = $(this).val();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailStatus = $('#emailStatus');
+
+        if (emailRegex.test(email)) {
+            emailStatus.html('<i class="bi bi-check-circle text-success"></i>');
+        } else if (email) {
+            emailStatus.html('<i class="bi bi-x-circle text-danger"></i>');
+        } else {
+            emailStatus.html('');
+        }
+    });
+
+    // Auto-fill demo accounts
+    $('.demo-account').click(function() {
+        const email = $(this).data('email');
+        const password = $(this).data('password');
+
+        // Animate the clicked card
+        $(this).css('transform', 'scale(0.95)');
+        setTimeout(() => {
+            $(this).css('transform', 'scale(1)');
+        }, 200);
+
+        // Fill form fields
+        $('#email').val(email).trigger('blur');
+        $('#password').val(password).trigger('input');
+
+        // Show success message
+        showToast('Demo Account Loaded', `Ready to login as ${email.split('@')[0]}`, 'success');
+
+        // Auto-focus on password field
+        setTimeout(() => $('#password').focus(), 300);
+    });
+
+    // Form submission
+    $('#loginForm').submit(function(e) {
+        const email = $('#email').val().trim();
+        const password = $('#password').val();
+
+        // Basic validation
+        if (!email || !password) {
+            e.preventDefault();
+            showToast('Validation Error', 'Please fill in all fields', 'danger');
+            return false;
+        }
+
+        // Email format validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            e.preventDefault();
+            showToast('Invalid Email', 'Please enter a valid email address', 'warning');
+            return false;
+        }
+
+        // Password length check
+        if (password.length < 6) {
+            e.preventDefault();
+            showToast('Password Too Short', 'Password must be at least 6 characters', 'warning');
+            return false;
+        }
+
+        // Show loading state
+        $('#loginSubmitBtn').html('<span class="spinner-border spinner-border-sm me-2"></span>Signing in...').prop('disabled', true);
+
+        // Form will submit normally
+        return true;
+    });
+
+    // Theme toggle functionality
+    $('.theme-light').click(function() {
+        $('body').removeClass('dark-mode');
+        $('.theme-toggle .btn').removeClass('active');
+        $(this).addClass('active');
+        localStorage.setItem('theme', 'light');
+        showToast('Theme Changed', 'Switched to light mode', 'info');
+    });
+
+    $('.theme-dark').click(function() {
+        $('body').addClass('dark-mode');
+        $('.theme-toggle .btn').removeClass('active');
+        $(this).addClass('active');
+        localStorage.setItem('theme', 'dark');
+        showToast('Theme Changed', 'Switched to dark mode', 'info');
+    });
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        $('.theme-dark').click();
+    }
+
+    // Language selector
+    $('.language-selector select').change(function() {
+        const lang = $(this).val();
+        showToast('Language Changed', `Switched to ${lang}`, 'info');
+        // Note: Actual language switching would require backend integration
+    });
+
+    // Password recovery function
+    window.sendResetEmail = function() {
+        const email = $('#recoveryEmail').val().trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!email) {
+            showToast('Error', 'Please enter your email address', 'warning');
+            return;
+        }
+
+        if (!emailRegex.test(email)) {
+            showToast('Invalid Email', 'Please enter a valid email address', 'warning');
+            return;
+        }
+
+        // Simulate API call
+        $('#passwordRecovery').modal('hide');
+        showToast('Reset Email Sent', `Instructions sent to ${email}`, 'success');
+        $('#recoveryEmail').val('');
+
+        // In real implementation, you would make an AJAX call here:
+        // $.post('/api/password-reset', { email: email }, function(response) {
+        //     showToast('Success', response.message, 'success');
+        // }).fail(function() {
+        //     showToast('Error', 'Failed to send reset email', 'danger');
+        // });
+    };
+
+    // Helper function to show toast notifications
+    function showToast(title, message, type = 'info') {
+        // Remove existing toasts
+        $('.toast-container').remove();
+
+        // Create toast
+        const toastHtml = `
+            <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+                <div class="toast show" role="alert">
+                    <div class="toast-header bg-${type} text-white">
+                        <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                        <strong class="me-auto">${title}</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        $('body').append(toastHtml);
+
+        // Auto-remove toast after 5 seconds
+        setTimeout(() => {
+            $('.toast-container').remove();
+        }, 5000);
+    }
+
+    // Auto-hide alerts after 5 seconds
+    setTimeout(() => {
+        $('.alert').alert('close');
+    }, 5000);
+
+    // Enter key submits form
+    $('#email, #password').keypress(function(e) {
+        if (e.which === 13) {
+            $('#loginForm').submit();
+        }
+    });
+});
+</script>
+{% endblock %}

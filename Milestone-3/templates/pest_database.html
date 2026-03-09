@@ -1,0 +1,1205 @@
+{% extends "base.html" %}
+
+{% block title %}Pest Database - AI-AgroBot{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ===== Green Theme Variables ===== */
+:root {
+    --primary-green: #2e7d32;
+    --secondary-green: #4caf50;
+    --light-green: #a5d6a7;
+    --pale-green: #e8f5e9;
+    --accent-green: #1b5e20;
+    --leaf-green: #81c784;
+}
+
+/* ===== Global Styles ===== */
+body {
+    background-color: #f1f8e9;
+}
+
+.gradient-bg {
+    background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+    color: white;
+    border: none;
+    border-radius: 25px;
+}
+
+/* ===== Cards ===== */
+.pest-card {
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    border: none;
+    background: linear-gradient(145deg, #ffffff 0%, var(--pale-green) 100%);
+    box-shadow: 0 10px 20px rgba(0,40,0,0.1);
+    overflow: hidden;
+    position: relative;
+}
+.pest-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 30px rgba(46, 125, 50, 0.3);
+}
+.pest-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--primary-green), var(--leaf-green));
+}
+
+/* Severity indicators */
+.severity-low { border-left: 6px solid #2e7d32; }
+.severity-medium { border-left: 6px solid #ffb74d; }
+.severity-high { border-left: 6px solid #d32f2f; }
+.severity-critical { border-left: 6px solid #7b1fa2; }
+
+/* ===== Icons and Badges ===== */
+.pest-icon {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+    color: white;
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    box-shadow: 0 5px 10px rgba(0,80,0,0.2);
+}
+
+.gradient-badge {
+    background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+    color: white;
+    padding: 5px 15px;
+    border-radius: 30px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+/* ===== Filters ===== */
+.filter-chip {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 8px 16px;
+    border-radius: 30px;
+    background: #e0f2e0;
+    color: var(--primary-green);
+    font-weight: 500;
+}
+.filter-chip.active {
+    background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+    color: white;
+    box-shadow: 0 5px 10px rgba(46, 125, 50, 0.3);
+}
+.filter-chip:hover {
+    transform: scale(1.05);
+    background: var(--light-green);
+}
+
+/* ===== Stat Cards ===== */
+.stat-card {
+    border-radius: 20px;
+    border: none;
+    background: white;
+    box-shadow: 0 8px 16px rgba(0,40,0,0.05);
+    transition: all 0.3s;
+}
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(46, 125, 50, 0.15);
+}
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+    color: white;
+}
+
+/* ===== Detail View ===== */
+.pest-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 15px;
+    border: 3px solid var(--secondary-green);
+    box-shadow: 0 5px 15px rgba(0,80,0,0.2);
+}
+
+.solution-card {
+    background: linear-gradient(145deg, #f1f8e9, #dcedc8);
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-left: 4px solid var(--secondary-green);
+}
+.solution-card.organic { border-left-color: var(--primary-green); }
+.solution-card.chemical { border-left-color: #ffb74d; }
+.solution-card.biological { border-left-color: #29b6f6; }
+
+.rating-stars {
+    color: #ffb300;
+    font-size: 0.9rem;
+}
+
+/* ===== Sidebar Cards ===== */
+.sidebar-card {
+    border-radius: 20px;
+    border: none;
+    background: white;
+    box-shadow: 0 5px 15px rgba(0,40,0,0.1);
+    overflow: hidden;
+}
+.sidebar-card .card-header {
+    background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 15px 20px;
+}
+
+/* ===== Success Story ===== */
+.success-story {
+    background: linear-gradient(145deg, #d4edda, #c3e6cb);
+    border-radius: 15px;
+    padding: 15px;
+    border-left: 4px solid var(--primary-green);
+    margin-bottom: 10px;
+}
+
+/* ===== Pest of the Week ===== */
+.pest-of-week {
+    background: linear-gradient(-45deg, #2e7d32, #4caf50, #81c784, #a5d6a7);
+    background-size: 400% 400%;
+    animation: gradient 10s ease infinite;
+    color: white;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 10px 20px rgba(0,40,0,0.2);
+}
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* ===== Accordion ===== */
+.accordion-item {
+    border: none;
+    margin-bottom: 10px;
+    border-radius: 15px !important;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.accordion-button {
+    background: linear-gradient(135deg, var(--pale-green), #ffffff);
+    color: var(--primary-green);
+    font-weight: 500;
+}
+.accordion-button:not(.collapsed) {
+    background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+    color: white;
+}
+.accordion-button:focus {
+    box-shadow: none;
+    border-color: var(--light-green);
+}
+
+/* ===== Buttons ===== */
+.btn-green {
+    background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 8px 20px;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+.btn-green:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(46, 125, 50, 0.4);
+    color: white;
+}
+.btn-outline-green {
+    border: 2px solid var(--primary-green);
+    color: var(--primary-green);
+    border-radius: 30px;
+    background: transparent;
+    transition: all 0.3s;
+}
+.btn-outline-green:hover {
+    background: var(--primary-green);
+    color: white;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header with green gradient -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="gradient-bg p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="display-5 fw-bold mb-3"><i class="bi bi-bug-fill me-2"></i>Pest & Disease Database</h1>
+                        <p class="lead mb-0">Comprehensive green guide to protect your crops naturally</p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <div class="display-6 mb-2">320+</div>
+                        <small>Pests & Diseases Documented</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Common in Region</h6>
+                            <h4 class="mb-0">28</h4>
+                            <small>in {{ current_user.region or 'your area' }}</small>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-bug"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">High Risk</h6>
+                            <h4 class="mb-0">12</h4>
+                            <small>Requires attention</small>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">For Your Crops</h6>
+                            <h4 class="mb-0">15</h4>
+                            <small>{{ current_user.primary_crop or 'Specific' }}</small>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-tree"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Organic Solutions</h6>
+                            <h4 class="mb-0">95</h4>
+                            <small>Natural methods</small>
+                        </div>
+                        <div class="stat-icon">
+                            <i class="bi bi-flower2"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pest of the Week (green animated) -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="pest-of-week">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0 me-3">
+                        <i class="bi bi-star-fill" style="font-size: 3rem;"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h3 class="mb-1">Pest of the Week: Fall Armyworm</h3>
+                        <p class="mb-0">High alert in maize growing regions. Check your crops immediately!</p>
+                    </div>
+                    <div>
+                        <span class="badge bg-white text-dark p-3 rounded-pill">Learn More →</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card" style="border-radius: 20px; border: none; box-shadow: 0 5px 15px rgba(0,40,0,0.1);">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="filter-chip active" data-filter="all">All</span>
+                                <span class="filter-chip" data-filter="pests">Pests</span>
+                                <span class="filter-chip" data-filter="diseases">Diseases</span>
+                                <span class="filter-chip" data-filter="fungal">Fungal</span>
+                                <span class="filter-chip" data-filter="bacterial">Bacterial</span>
+                                <span class="filter-chip" data-filter="viral">Viral</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="cropFilter">
+                                <option value="">All Crops</option>
+                                <option value="Wheat">Wheat</option>
+                                <option value="Rice">Rice</option>
+                                <option value="Maize">Maize</option>
+                                <option value="Cotton">Cotton</option>
+                                <option value="Vegetables">Vegetables</option>
+                                <option value="Fruits">Fruits</option>
+                                <option value="Pulses">Pulses</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-success"><i class="bi bi-search text-success"></i></span>
+                                <input type="text" class="form-control border-success" placeholder="Search pest or disease..." id="pestSearch">
+                                <button class="btn btn-green" type="button" id="searchBtn"><i class="bi bi-search"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row">
+        <!-- Left Column: Pest Grid -->
+        <div class="col-lg-8">
+            <div class="row" id="pestGrid">
+                <!-- Pest cards will be loaded here -->
+            </div>
+
+            <!-- Detailed View -->
+            <div class="card mb-4 d-none" id="pestDetail" style="border-radius: 20px; border: none; box-shadow: 0 10px 25px rgba(0,40,0,0.1);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <button class="btn btn-outline-green rounded-pill" id="backToList">
+                            <i class="bi bi-arrow-left me-2"></i>Back to List
+                        </button>
+                        <div>
+                            <button class="btn btn-outline-green rounded-pill me-2" id="sharePest"><i class="bi bi-share"></i></button>
+                            <button class="btn btn-outline-green rounded-pill" id="downloadPest"><i class="bi bi-download"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="pest-icon mx-auto mb-3">
+                                <i class="bi bi-bug" id="detailIcon"></i>
+                            </div>
+                            <img id="detailImage" src="" class="pest-image mb-3" alt="Pest Image">
+                            <div class="alert" id="severityBadge">
+                                <strong>Severity: </strong><span id="severityText"></span>
+                                <div class="rating-stars mt-1" id="severityStars"></div>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-green rounded-pill" id="reportSighting"><i class="bi bi-flag me-2"></i>Report Sighting</button>
+                                <button class="btn btn-outline-green rounded-pill" id="compareBtn"><i class="bi bi-arrow-left-right me-2"></i>Compare</button>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <h3 id="detailName"></h3>
+                            <div class="mb-3">
+                                <span class="gradient-badge me-2" id="detailType"></span>
+                                <span class="badge bg-success" id="detailCrops"></span>
+                            </div>
+                            <p id="detailDescription" class="mb-4"></p>
+
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <strong><i class="bi bi-geo-alt-fill text-success me-1"></i>Region:</strong>
+                                    <span id="detailRegion"></span>
+                                </div>
+                                <div class="col-6">
+                                    <strong><i class="bi bi-calendar-event text-success me-1"></i>Season:</strong>
+                                    <span id="detailSeason"></span>
+                                </div>
+                            </div>
+
+                            <h5><i class="bi bi-exclamation-circle-fill text-warning me-2"></i>Symptoms</h5>
+                            <ul id="detailSymptoms" class="mb-4"></ul>
+
+                            <h5><i class="bi bi-flower2 text-success me-2"></i>Organic Solutions</h5>
+                            <div id="detailOrganic" class="mb-3"></div>
+
+                            <h5><i class="bi bi-capsule-pill text-warning me-2"></i>Chemical Solutions</h5>
+                            <div id="detailChemical" class="mb-3"></div>
+
+                            <h5><i class="bi bi-shield-fill text-info me-2"></i>Prevention Tips</h5>
+                            <ul id="detailPrevention" class="mb-4"></ul>
+
+                            <h5><i class="bi bi-arrow-repeat text-primary me-2"></i>Life Cycle</h5>
+                            <p id="detailLifecycle" class="mb-4"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Green Sidebar -->
+        <div class="col-lg-4">
+            <!-- Seasonal Alerts (green themed) -->
+            <div class="card sidebar-card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-calendar-event-fill me-2"></i>Seasonal Alerts - <span id="currentMonth"></span>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-success mb-2" style="background: #d4edda; border: none; border-radius: 15px;">
+                        <strong>Aphids:</strong> Peak season for wheat. Monitor weekly.
+                    </div>
+                    <div class="alert alert-success mb-2" style="background: #d4edda; border: none; border-radius: 15px;">
+                        <strong>Blast Disease:</strong> High humidity increases risk.
+                    </div>
+                    <div class="alert alert-success mb-0" style="background: #d4edda; border: none; border-radius: 15px;">
+                        <strong>Whiteflies:</strong> Decreasing activity. Good time for preventive sprays.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Regional Alerts -->
+            <div class="card sidebar-card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Regional Alerts
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning mb-3 rounded-4" style="background: #fff3cd; border: none;">
+                        <h6><i class="bi bi-bug-fill me-2"></i>Aphid Outbreak</h6>
+                        <p class="small mb-0">High activity in {{ current_user.region or 'your region' }}. Monitor wheat crops.</p>
+                        <small class="text-muted">Updated: Today</small>
+                    </div>
+
+                    <div class="alert alert-info mb-3 rounded-4" style="background: #d1ecf1; border: none;">
+                        <h6><i class="bi bi-droplet-fill me-2"></i>Blast Disease</h6>
+                        <p class="small mb-0">Conditions favorable for rice blast. Apply preventive measures.</p>
+                        <small class="text-muted">Updated: 2 days ago</small>
+                    </div>
+
+                    <div class="alert alert-success mb-0 rounded-4" style="background: #d4edda; border: none;">
+                        <h6><i class="bi bi-emoji-smile-fill me-2"></i>Low Risk Period</h6>
+                        <p class="small mb-0">Current weather reduces pest activity. Good time for preventive sprays.</p>
+                        <small class="text-muted">Updated: 1 week ago</small>
+                    </div>
+
+                    <button class="btn btn-green w-100 mt-3 rounded-pill" id="setCustomAlert">
+                        <i class="bi bi-bell me-2"></i>Set Custom Alerts
+                    </button>
+                </div>
+            </div>
+
+            <!-- Success Stories Carousel -->
+            <div class="card sidebar-card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-star-fill me-2"></i>Farmer Success Stories
+                </div>
+                <div class="card-body">
+                    <div id="successCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <div class="success-story">
+                                    <p class="small">"Used neem oil spray weekly – completely controlled aphids in my wheat field!"</p>
+                                    <small class="text-muted">– Ramesh, Punjab</small>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <div class="success-story">
+                                    <p class="small">"Baking soda spray worked wonders on powdery mildew in my grapes."</p>
+                                    <small class="text-muted">– Priya, Maharashtra</small>
+                                </div>
+                            </div>
+                            <div class="carousel-item">
+                                <div class="success-story">
+                                    <p class="small">"Released ladybugs and saw aphid population drop by 80% in 2 weeks."</p>
+                                    <small class="text-muted">– Anil, Karnataka</small>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#successCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#successCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Organic Solutions -->
+            <div class="card sidebar-card mb-4">
+                <div class="card-header">
+                    <i class="bi bi-lightbulb-fill me-2"></i>Quick Organic Solutions
+                </div>
+                <div class="card-body">
+                    <div class="solution-card organic">
+                        <h6><i class="bi bi-droplet me-2 text-success"></i>Neem Oil Spray</h6>
+                        <p class="small mb-0">Mix 5ml neem oil per liter of water. Spray weekly.</p>
+                        <small class="text-success">⭐⭐⭐⭐⭐ (245 ratings)</small>
+                    </div>
+
+                    <div class="solution-card organic">
+                        <h6><i class="bi bi-cup-straw me-2 text-success"></i>Baking Soda Fungicide</h6>
+                        <p class="small mb-0">1 tbsp baking soda + 1 liter water + few drops soap.</p>
+                        <small class="text-success">⭐⭐⭐⭐ (189 ratings)</small>
+                    </div>
+
+                    <div class="solution-card biological">
+                        <h6><i class="bi bi-flower1 me-2 text-info"></i>Garlic-Chili Spray</h6>
+                        <p class="small mb-0">Blend garlic + chili + water. Strain and spray.</p>
+                        <small class="text-info">⭐⭐⭐⭐⭐ (312 ratings)</small>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <button class="btn btn-green rounded-pill" data-bs-toggle="modal" data-bs-target="#solutionModal">
+                            <i class="bi bi-plus-circle me-2"></i>More Solutions
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Green Tips -->
+            <div class="card sidebar-card">
+                <div class="card-header">
+                    <i class="bi bi-tree-fill me-2"></i>Green Prevention Tips
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Crop rotation reduces pest buildup</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Companion planting: marigold, basil</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Attract beneficial insects with flowers</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Use resistant varieties</li>
+                        <li><i class="bi bi-check-circle-fill text-success me-2"></i>Maintain field sanitation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQs (green accordion) -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0" style="border-radius: 25px; background: #e8f5e9;">
+                <div class="card-header bg-transparent border-0 pt-3">
+                    <h5 class="mb-0"><i class="bi bi-question-circle-fill text-success me-2"></i>Frequently Asked Questions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                    How to identify pest damage vs nutrient deficiency?
+                                </button>
+                            </h2>
+                            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Pest damage usually shows irregular patterns, holes, or visible insects. Nutrient deficiencies show uniform patterns across the plant. Upload images to AI-AgroBot for accurate diagnosis.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                    When is the best time to apply organic pesticides?
+                                </button>
+                            </h2>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Early morning or late evening when temperatures are cooler. Avoid spraying during flowering to protect pollinators. Check weather forecast to avoid rain washing away treatment.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                    Are organic pesticides as effective as chemicals?
+                                </button>
+                            </h2>
+                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Yes, organic pesticides can be very effective when used correctly and consistently. They are safer for the environment, beneficial insects, and human health. Regular application is key for prevention.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Compare Modal -->
+<div class="modal fade" id="compareModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Compare Pests</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <select class="form-select mb-3" id="compare1">
+                            <option value="">Select first pest</option>
+                        </select>
+                        <div id="compare1Details"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <select class="form-select mb-3" id="compare2">
+                            <option value="">Select second pest</option>
+                        </select>
+                        <div id="compare2Details"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Solutions Modal -->
+<div class="modal fade" id="solutionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-flower2 me-2"></i>Organic Solutions Library</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="card solution-card organic h-100">
+                            <h6><i class="bi bi-droplet me-2"></i>Neem-Based Solutions</h6>
+                            <ul class="small">
+                                <li>Neem oil spray for insects</li>
+                                <li>Neem cake for soil pests</li>
+                                <li>Neem leaf extract for fungus</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card solution-card organic h-100">
+                            <h6><i class="bi bi-cup-straw me-2"></i>Home Remedies</h6>
+                            <ul class="small">
+                                <li>Soap solution for soft-bodied insects</li>
+                                <li>Vinegar for weed control</li>
+                                <li>Eggshells for slugs</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card solution-card biological h-100">
+                            <h6><i class="bi bi-flower1 me-2"></i>Companion Plants</h6>
+                            <ul class="small">
+                                <li>Marigold for nematodes</li>
+                                <li>Basil for flies and mosquitoes</li>
+                                <li>Garlic for aphids</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card solution-card biological h-100">
+                            <h6><i class="bi bi-bug-fill me-2"></i>Beneficial Insects</h6>
+                            <ul class="small">
+                                <li>Ladybugs for aphids</li>
+                                <li>Praying mantis for caterpillars</li>
+                                <li>Lacewings for mites</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Display current month
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const now = new Date();
+    $('#currentMonth').text(monthNames[now.getMonth()]);
+
+    // Expanded pest data with more entries and details
+    const pestData = [
+        {
+            id: 1,
+            name: "Aphids",
+            scientific: "Aphidoidea",
+            type: "Pest",
+            crops: ["Wheat", "Rice", "Vegetables"],
+            region: ["North India", "Punjab", "Haryana"],
+            season: "Spring, Summer",
+            severity: "High",
+            severityStars: 4,
+            description: "Small sap-sucking insects that cause curling and yellowing of leaves. They excrete honeydew leading to sooty mold.",
+            symptoms: ["Yellow leaves", "Stunted growth", "Honeydew secretion", "Sooty mold", "Ants farming aphids"],
+            organic: [
+                "Neem oil spray (5ml/liter) weekly",
+                "Release ladybugs (1,000 per acre)",
+                "Garlic-chili spray",
+                "Soap solution (2 tsp liquid soap per liter)"
+            ],
+            chemical: [
+                "Imidacloprid 17.8% SL @ 0.5ml/liter",
+                "Dimethoate 30% EC @ 1ml/liter"
+            ],
+            prevention: ["Regular monitoring", "Companion planting with garlic, marigold", "Remove affected leaves", "Avoid excess nitrogen"],
+            lifecycle: "Egg → Nymph → Adult (7-10 days). Multiple generations per season.",
+            image: "https://via.placeholder.com/300x200/2e7d32/ffffff?text=Aphids",
+            icon: "bi-bug-fill",
+            comments: []
+        },
+        {
+            id: 2,
+            name: "Blast Disease",
+            scientific: "Magnaporthe oryzae",
+            type: "Fungal Disease",
+            crops: ["Rice"],
+            region: ["South India", "East India", "All rice growing areas"],
+            season: "Kharif (wet season)",
+            severity: "High",
+            severityStars: 5,
+            description: "Fungal disease causing spindle-shaped spots on leaves, nodes, and panicles. Can cause complete yield loss.",
+            symptoms: ["Spindle-shaped spots with gray center", "Node infection leading to breakage", "Panicle blast (white empty grains)", "Lesions on leaves"],
+            organic: [
+                "Pseudomonas fluorescens seed treatment (10g/kg)",
+                "Neem cake application (150kg/ha)",
+                "Spray of 5% cow urine + 5% neem oil"
+            ],
+            chemical: [
+                "Tricyclazole 75% WP @ 0.6g/liter",
+                "Carbendazim 50% WP @ 1g/liter"
+            ],
+            prevention: ["Use resistant varieties (e.g., IR64, Pusa 44)", "Avoid excess nitrogen", "Proper spacing for air circulation", "Field sanitation, remove stubble"],
+            lifecycle: "Spores germinate in 6-8 hours, lesions appear in 4-5 days. Spreads rapidly in high humidity.",
+            image: "https://via.placeholder.com/300x200/2e7d32/ffffff?text=Blast",
+            icon: "bi-droplet-fill",
+            comments: []
+        },
+        {
+            id: 3,
+            name: "Whiteflies",
+            scientific: "Bemisia tabaci",
+            type: "Pest",
+            crops: ["Cotton", "Vegetables", "Cassava"],
+            region: ["All tropical regions", "Maharashtra", "Gujarat"],
+            season: "Summer, Kharif",
+            severity: "Medium",
+            severityStars: 3,
+            description: "Tiny white insects that suck plant sap and transmit viruses like leaf curl.",
+            symptoms: ["Yellowing leaves", "Sticky honeydew", "Sooty mold", "Leaf curl", "Stunted growth"],
+            organic: [
+                "Yellow sticky traps (8-10 per acre)",
+                "Neem oil spray (5ml/liter) every 5 days",
+                "Release Encarsia formosa (parasitic wasp)"
+            ],
+            chemical: [
+                "Acetamiprid 20% SP @ 0.5g/liter",
+                "Buprofezin 25% SC @ 2ml/liter"
+            ],
+            prevention: ["Weed control", "Reflective mulches (silver polythene)", "Crop rotation", "Avoid continuous cropping"],
+            lifecycle: "Egg → Nymph → Adult (25-30 days). Overlaps in warm weather.",
+            image: "https://via.placeholder.com/300x200/2e7d32/ffffff?text=Whiteflies",
+            icon: "bi-bug",
+            comments: []
+        },
+        {
+            id: 4,
+            name: "Powdery Mildew",
+            scientific: "Erysiphales",
+            type: "Fungal Disease",
+            crops: ["Wheat", "Vegetables", "Fruits", "Grapes"],
+            region: ["North India", "Himachal", "Uttarakhand"],
+            season: "Spring, Autumn (cool, dry weather)",
+            severity: "Medium",
+            severityStars: 3,
+            description: "White powdery fungal growth on leaves and stems. Prefers high humidity but dry leaves.",
+            symptoms: ["White powdery spots on upper leaf surface", "Leaf curling", "Premature leaf drop", "Reduced yield", "Distorted growth"],
+            organic: [
+                "Baking soda spray (1 tbsp per liter + few drops soap)",
+                "Milk spray (1 part milk : 9 parts water)",
+                "Sulfur dust (wettable sulfur 2g/liter)",
+                "Neem oil spray"
+            ],
+            chemical: [
+                "Hexaconazole 5% EC @ 2ml/liter",
+                "Tebuconazole 25% EC @ 1ml/liter"
+            ],
+            prevention: ["Adequate spacing for air flow", "Proper ventilation", "Avoid overhead irrigation", "Resistant varieties"],
+            lifecycle: "Spores spread by wind, germinate in high humidity. Can overwinter on plant debris.",
+            image: "https://via.placeholder.com/300x200/2e7d32/ffffff?text=Powdery+Mildew",
+            icon: "bi-cloud-fog2-fill",
+            comments: []
+        },
+        {
+            id: 5,
+            name: "Fall Armyworm",
+            scientific: "Spodoptera frugiperda",
+            type: "Pest",
+            crops: ["Maize", "Sorghum", "Rice", "Sugarcane"],
+            region: ["All India", "Africa", "Americas"],
+            season: "Kharif, Rabi",
+            severity: "High",
+            severityStars: 5,
+            description: "Invasive pest that feeds on leaves and whorls, causing extensive damage. Larvae bore into cobs.",
+            symptoms: ["Irregular holes in leaves", "Window pane damage", "Frass (excreta) near whorl", "Deadheart in young plants"],
+            organic: [
+                "Handpicking and destroying larvae",
+                "Neem oil + soap spray",
+                "Apply sand or ash in whorls",
+                "Release Trichogramma (egg parasitoid)"
+            ],
+            chemical: [
+                "Spinetoram 11.7% SC @ 0.5ml/liter",
+                "Chlorantraniliprole 18.5% SC @ 0.4ml/liter"
+            ],
+            prevention: ["Early planting", "Monitoring with pheromone traps", "Intercropping with legumes", "Deep plowing to expose pupae"],
+            lifecycle: "Egg → Larva (6 instars) → Pupa → Adult (30-40 days). Multiple generations.",
+            image: "https://via.placeholder.com/300x200/2e7d32/ffffff?text=Fall+Armyworm",
+            icon: "bi-bug-fill",
+            comments: []
+        },
+        {
+            id: 6,
+            name: "Bacterial Leaf Blight",
+            scientific: "Xanthomonas oryzae pv. oryzae",
+            type: "Bacterial Disease",
+            crops: ["Rice"],
+            region: ["Asia", "India (all rice belts)"],
+            season: "Kharif (wet, windy)",
+            severity: "High",
+            severityStars: 4,
+            description: "Causes wilting and drying of leaves. Bacterial ooze appears on cut leaves.",
+            symptoms: ["Water-soaked lesions on leaf margins", "Yellowish stripes with wavy edges", "Bacterial ooze (milky dew)", "Drying of leaves"],
+            organic: [
+                "Copper oxychloride spray (3g/liter)",
+                "Pseudomonas fluorescens spray",
+                "Neem oil + cow urine spray"
+            ],
+            chemical: [
+                "Streptocycline (10g) + Copper oxychloride (25g) per 10 liters",
+                "Plantomycin 15g per 10 liters"
+            ],
+            prevention: ["Use resistant varieties", "Avoid high nitrogen", "Field sanitation", "Balanced fertilization"],
+            lifecycle: "Bacteria survive in stubble and seeds. Spread by rain splash and wind.",
+            image: "https://via.placeholder.com/300x200/2e7d32/ffffff?text=Bacterial+Blight",
+            icon: "bi-droplet-fill",
+            comments: []
+        },
+        {
+            id: 7,
+            name: "Thrips",
+            scientific: "Thysanoptera",
+            type: "Pest",
+            crops: ["Cotton", "Onion", "Chilli", "Groundnut"],
+            region: ["Maharashtra", "Karnataka", "Gujarat"],
+            season: "Summer, Kharif",
+            severity: "Medium",
+            severityStars: 3,
+            description: "Tiny slender insects that rasp plant tissue and suck sap. Cause silvering of leaves.",
+            symptoms: ["Silvery streaks on leaves", "Curling and stunting", "Black specks of excreta", "Scarred flowers and fruits"],
+            organic: [
+                "Neem oil + soap spray weekly",
+                "Blue sticky traps",
+                "Spray of fish oil rosin soap",
+                "Release predatory mites (Amblyseius)"
+            ],
+            chemical: [
+                "Spinosad 45% SC @ 0.3ml/liter",
+                "Fipronil 5% SC @ 1.5ml/liter"
+            ],
+            prevention: ["Avoid water stress", "Mulching", "Remove alternate hosts (weeds)", "Intercrop with marigold"],
+            lifecycle: "Egg → Larva → Pupa → Adult (2 weeks). Multiple generations.",
+            image: "https://via.placeholder.com/300x200/2e7d32/ffffff?text=Thrips",
+            icon: "bi-bug",
+            comments: []
+        },
+        {
+            id: 8,
+            name: "Downy Mildew",
+            scientific: "Peronospora farinosa",
+            type: "Fungal Disease",
+            crops: ["Grapes", "Cucurbits", "Onion"],
+            region: ["Nashik", "Hyderabad", "Cool humid areas"],
+            season: "Rainy, cool weather",
+            severity: "High",
+            severityStars: 4,
+            description: "Yellow angular spots on upper leaf surface with white downy growth below.",
+            symptoms: ["Pale yellow spots on leaves", "White fluffy growth on underside", "Premature leaf drop", "Blighted shoots"],
+            organic: [
+                "Copper fungicide (Bordeaux mixture 1%)",
+                "Milk spray (1:10)",
+                "Baking soda + oil spray",
+                "Trichoderma spray"
+            ],
+            chemical: [
+                "Mancozeb 75% WP @ 2g/liter",
+                "Metalaxyl + Mancozeb @ 2g/liter"
+            ],
+            prevention: ["Avoid overhead irrigation", "Proper spacing", "Resistant varieties", "Remove infected debris"],
+            lifecycle: "Oospores in soil, spread by wind and rain.",
+            image: "https://via.placeholder.com/300x200/2e7d32/ffffff?text=Downy+Mildew",
+            icon: "bi-cloud-fog2-fill",
+            comments: []
+        }
+    ];
+
+    // Render pest grid
+    function renderPestGrid(data) {
+        const grid = $('#pestGrid');
+        grid.empty();
+
+        data.forEach(pest => {
+            const severityClass = `severity-${pest.severity.toLowerCase()}`;
+
+            const card = `
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card pest-card ${severityClass}" data-pest-id="${pest.id}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title mb-1">${pest.name}</h5>
+                                    <span class="badge bg-success">${pest.type}</span>
+                                </div>
+                                <span class="badge ${pest.severity === 'High' ? 'bg-danger' : pest.severity === 'Medium' ? 'bg-warning' : 'bg-success'} rounded-pill">
+                                    ${pest.severity}
+                                </span>
+                            </div>
+                            <div class="text-center mb-3">
+                                <i class="bi ${pest.icon} display-4" style="color: #2e7d32;"></i>
+                            </div>
+                            <p class="card-text small text-muted">${pest.description.substring(0, 100)}...</p>
+                            <div class="mb-3">
+                                <small class="text-muted">Affects:</small>
+                                <div class="d-flex flex-wrap gap-1">
+                                    ${pest.crops.map(crop => `<span class="badge bg-success rounded-pill">${crop}</span>`).join('')}
+                                </div>
+                            </div>
+                            <div class="rating-stars mb-2">
+                                ${generateStars(pest.severityStars)}
+                            </div>
+                            <button class="btn btn-sm btn-outline-green w-100 rounded-pill view-detail" data-id="${pest.id}">
+                                View Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            grid.append(card);
+        });
+    }
+
+    // Generate star ratings
+    function generateStars(rating) {
+        let stars = '';
+        for (let i = 1; i <= 5; i++) {
+            if (i <= rating) stars += '<i class="bi bi-star-fill"></i>';
+            else stars += '<i class="bi bi-star"></i>';
+        }
+        return stars;
+    }
+
+    // Filter by type and crop
+    $('.filter-chip').click(function() {
+        $('.filter-chip').removeClass('active');
+        $(this).addClass('active');
+        applyFilters();
+    });
+
+    $('#cropFilter').change(applyFilters);
+    $('#pestSearch').on('input', applyFilters);
+
+    function applyFilters() {
+        const filter = $('.filter-chip.active').data('filter');
+        const crop = $('#cropFilter').val().toLowerCase();
+        const search = $('#pestSearch').val().toLowerCase();
+
+        let filtered = pestData;
+
+        if (filter !== 'all') {
+            filtered = filtered.filter(pest => {
+                if (filter === 'pests') return pest.type === 'Pest';
+                if (filter === 'diseases') return pest.type.includes('Disease');
+                if (filter === 'fungal') return pest.type === 'Fungal Disease';
+                if (filter === 'bacterial') return pest.type === 'Bacterial Disease';
+                if (filter === 'viral') return pest.type === 'Viral Disease';
+                return true;
+            });
+        }
+
+        if (crop) {
+            filtered = filtered.filter(pest =>
+                pest.crops.some(c => c.toLowerCase().includes(crop))
+            );
+        }
+
+        if (search) {
+            filtered = filtered.filter(pest =>
+                pest.name.toLowerCase().includes(search) ||
+                pest.description.toLowerCase().includes(search) ||
+                pest.crops.some(c => c.toLowerCase().includes(search))
+            );
+        }
+
+        renderPestGrid(filtered);
+    }
+
+    // View detail
+    $(document).on('click', '.view-detail', function() {
+        const pestId = parseInt($(this).data('id'));
+        const pest = pestData.find(p => p.id === pestId);
+
+        if (pest) {
+            $('#pestGrid').addClass('d-none');
+            $('#pestDetail').removeClass('d-none');
+
+            $('#detailName').text(pest.name + (pest.scientific ? ` (${pest.scientific})` : ''));
+            $('#detailType').text(pest.type);
+            $('#detailCrops').text(pest.crops.join(', '));
+            $('#detailDescription').text(pest.description);
+            $('#detailIcon').attr('class', `bi ${pest.icon}`);
+            $('#detailImage').attr('src', pest.image);
+            $('#detailLifecycle').text(pest.lifecycle);
+            $('#detailRegion').text(pest.region.join(', '));
+            $('#detailSeason').text(pest.season);
+
+            // Severity
+            const severityBadge = $('#severityBadge');
+            severityBadge.removeClass('alert-success alert-warning alert-danger');
+            if (pest.severity === 'High') severityBadge.addClass('alert-danger');
+            else if (pest.severity === 'Medium') severityBadge.addClass('alert-warning');
+            else severityBadge.addClass('alert-success');
+            $('#severityText').text(pest.severity);
+            $('#severityStars').html(generateStars(pest.severityStars));
+
+            // Symptoms
+            const symptomsList = $('#detailSymptoms');
+            symptomsList.empty();
+            pest.symptoms.forEach(symptom => {
+                symptomsList.append(`<li><i class="bi bi-check-circle-fill text-success me-2"></i>${symptom}</li>`);
+            });
+
+            // Organic solutions
+            const organicDiv = $('#detailOrganic');
+            organicDiv.empty();
+            pest.organic.forEach(item => {
+                organicDiv.append(`<div class="solution-card organic mb-2"><i class="bi bi-flower2 me-2 text-success"></i>${item}</div>`);
+            });
+
+            // Chemical solutions
+            const chemicalDiv = $('#detailChemical');
+            chemicalDiv.empty();
+            pest.chemical.forEach(item => {
+                chemicalDiv.append(`<div class="solution-card chemical mb-2"><i class="bi bi-capsule-pill me-2 text-warning"></i>${item}</div>`);
+            });
+
+            // Prevention
+            const preventionList = $('#detailPrevention');
+            preventionList.empty();
+            pest.prevention.forEach(method => {
+                preventionList.append(`<li><i class="bi bi-shield-check text-info me-2"></i>${method}</li>`);
+            });
+        }
+    });
+
+    // Back to list
+    $('#backToList').click(function() {
+        $('#pestDetail').addClass('d-none');
+        $('#pestGrid').removeClass('d-none');
+    });
+
+    // Share
+    $('#sharePest').click(function() {
+        alert('Share feature coming soon!');
+    });
+
+    // Download
+    $('#downloadPest').click(function() {
+        alert('PDF download feature coming soon!');
+    });
+
+    // Report sighting
+    $('#reportSighting').click(function() {
+        alert('Thank you for reporting. Local authorities will be notified.');
+    });
+
+    // Compare
+    $('#compareBtn').click(function() {
+        const select1 = $('#compare1');
+        const select2 = $('#compare2');
+        select1.empty().append('<option value="">Select first pest</option>');
+        select2.empty().append('<option value="">Select second pest</option>');
+
+        pestData.forEach(p => {
+            select1.append(`<option value="${p.id}">${p.name}</option>`);
+            select2.append(`<option value="${p.id}">${p.name}</option>`);
+        });
+
+        $('#compareModal').modal('show');
+    });
+
+    // Compare selection change
+    $('#compare1, #compare2').change(function() {
+        const id = $(this).val();
+        const target = $(this).attr('id') === 'compare1' ? '#compare1Details' : '#compare2Details';
+        if (id) {
+            const pest = pestData.find(p => p.id == id);
+            $(target).html(`
+                <div class="card">
+                    <div class="card-body">
+                        <h6>${pest.name}</h6>
+                        <p>${pest.description.substring(0, 100)}...</p>
+                        <small>Severity: ${pest.severity}</small><br>
+                        <small>Crops: ${pest.crops.join(', ')}</small>
+                    </div>
+                </div>
+            `);
+        } else {
+            $(target).empty();
+        }
+    });
+
+    // Set custom alert (from sidebar)
+    $('#setCustomAlert').click(function() {
+        alert('Custom alerts feature coming soon!');
+    });
+
+    // Initialize
+    renderPestGrid(pestData);
+});
+</script>
+{% endblock %}

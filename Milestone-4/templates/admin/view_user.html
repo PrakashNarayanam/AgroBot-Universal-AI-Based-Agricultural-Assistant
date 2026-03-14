@@ -1,0 +1,389 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.name or user.email }} - User Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-success text-black">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="display-5 fw-bold mb-3">User Details</h1>
+                            <p class="lead mb-0">Detailed information and activity for {{ user.name or user.email }}</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{{ url_for('admin_users') }}" class="btn btn-light">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Users
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column: User Info -->
+        <div class="col-lg-4 mb-4">
+            <!-- Profile Card -->
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    {% if user.profile_picture %}
+                    <img src="{{ url_for('uploaded_file', filename=user.profile_picture) }}"
+                         class="rounded-circle mb-3" width="120" height="120" alt="Profile">
+                    {% else %}
+                    <div class="rounded-circle bg-secondary mb-3 mx-auto d-flex align-items-center justify-content-center"
+                         style="width: 120px; height: 120px;">
+                        <i class="bi bi-person text-white" style="font-size: 3rem;"></i>
+                    </div>
+                    {% endif %}
+
+                    <h4>{{ user.name or 'No Name' }}</h4>
+                    <p class="text-muted">{{ user.email }}</p>
+
+                    <div class="mb-4">
+                        <span class="badge {% if user.role == 'admin' %}bg-danger{% elif user.role == 'agent' %}bg-warning{% else %}bg-success{% endif %} fs-6">
+                            {{ user.role|title }}
+                        </span>
+                        <span class="badge {% if user.is_active %}bg-success{% else %}bg-secondary{% endif %} fs-6 ms-1">
+                            {{ 'Active' if user.is_active else 'Inactive' }}
+                        </span>
+                    </div>
+
+                    <div class="d-grid gap-2 mb-3">
+                        <form method="POST" action="{{ url_for('admin_toggle_user_status', user_id=user.id) }}" class="d-grid">
+                            <button type="submit" class="btn {% if user.is_active %}btn-warning{% else %}btn-success{% endif %}">
+                                <i class="bi bi-power me-2"></i>
+                                {% if user.is_active %}Deactivate User{% else %}Activate User{% endif %}
+                            </button>
+                        </form>
+                        {% if current_user.id != user.id and user.role != 'admin' %}
+                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal">
+                            <i class="bi bi-trash me-2"></i>Delete User
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Stats -->
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">User Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <small class="text-muted d-block">Total Chats</small>
+                            <h3>{{ total_chats }}</h3>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <small class="text-muted d-block">Image Analyses</small>
+                            <h3>{{ total_images }}</h3>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="text-muted d-block">Daily Chats (Last 7 Days)</small>
+                        {% if daily_chats %}
+                        <div class="mt-2">
+                            {% for daily in daily_chats %}
+                            <div class="d-flex justify-content-between mb-1">
+                                <small>{{ daily.date }}</small>
+                                <small>{{ daily.count }} chats</small>
+                            </div>
+                            <div class="progress" style="height: 5px;">
+                                <div class="progress-bar bg-success" style="width: {{ (daily.count / (daily_chats[0].count or 1)) * 100 }}%"></div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-muted mb-0">No recent activity</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="mt-4">
+                        <small class="text-muted d-block">Last Active</small>
+                        <p class="mb-0">{{ user.last_seen.strftime('%Y-%m-%d %H:%M') if user.last_seen else 'Never' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: User Details & Activity -->
+        <div class="col-lg-8">
+            <!-- User Information -->
+            <div class="card mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">User Information</h5>
+                    <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editUserModal">
+                        <i class="bi bi-pencil me-2"></i>Edit
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Email Address</label>
+                            <p class="fs-5">{{ user.email }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Phone Number</label>
+                            <p class="fs-5">{{ user.phone or 'Not provided' }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Region/Location</label>
+                            <p class="fs-5">{{ user.region or 'Not provided' }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Farm Size</label>
+                            <p class="fs-5">{{ user.farm_size or 'Not specified' }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Primary Crop</label>
+                            <p class="fs-5">{{ user.primary_crop or 'Not specified' }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Experience Level</label>
+                            <p class="fs-5">{{ user.experience_level or 'Not specified' }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Registration Date</label>
+                            <p class="fs-5">{{ user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else 'N/A' }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted">Account Status</label>
+                            <p class="fs-5">
+                                <span class="badge {% if user.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                                    {{ 'Active' if user.is_active else 'Inactive' }}
+                                </span>
+                            </p>
+                        </div>
+                        {% if user.about %}
+                        <div class="col-12 mb-3">
+                            <label class="form-label text-muted">About/Bio</label>
+                            <p>{{ user.about }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity Tabs -->
+            <div class="card">
+                <div class="card-header bg-white">
+                    <ul class="nav nav-tabs card-header-tabs" id="activityTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="chats-tab" data-bs-toggle="tab" data-bs-target="#chats" type="button">
+                                Recent Chats ({{ chats|length }})
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="images-tab" data-bs-toggle="tab" data-bs-target="#images" type="button">
+                                Image Analyses ({{ images|length }})
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="activityTabsContent">
+                        <!-- Chats Tab -->
+                        <div class="tab-pane fade show active" id="chats" role="tabpanel">
+                            {% if chats %}
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Time</th>
+                                            <th>Question</th>
+                                            <th>Response</th>
+                                            <th>Type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for chat in chats %}
+                                        <tr>
+                                            <td><small>{{ chat.created_at.strftime('%H:%M') }}</small></td>
+                                            <td>
+                                                <div class="text-truncate" style="max-width: 150px;">
+                                                    {{ chat.user_message[:50] }}{% if chat.user_message|length > 50 %}...{% endif %}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="text-truncate" style="max-width: 150px;">
+                                                    {{ chat.bot_response[:50] }}{% if chat.bot_response|length > 50 %}...{% endif %}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge {% if chat.chat_type == 'image' %}bg-warning{% else %}bg-info{% endif %}">
+                                                    {{ chat.chat_type or 'text' }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="text-center mt-3">
+                                <a href="{{ url_for('admin_chats', user_id=user.id) }}" class="btn btn-sm btn-success">
+                                    View All Chats
+                                </a>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="bi bi-chat-dots text-muted" style="font-size: 2rem;"></i>
+                                <p class="text-muted mt-2">No chat history found</p>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Images Tab -->
+                        <div class="tab-pane fade" id="images" role="tabpanel">
+                            {% if images %}
+                            <div class="row">
+                                {% for image in images %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <small class="text-muted">{{ image.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                                                <span class="badge bg-info">{{ image.analysis_type or 'general' }}</span>
+                                            </div>
+                                            {% if image.image_path %}
+                                            <img src="{{ url_for('uploaded_file', filename=image.image_path.split('/')[-1]) }}"
+                                                 class="img-fluid rounded mb-2" style="max-height: 150px;">
+                                            {% endif %}
+                                            <p class="mb-0">
+                                                <strong>Result:</strong> {{ image.analysis_result[:100] }}{% if image.analysis_result|length > 100 %}...{% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center py-4">
+                                <i class="bi bi-images text-muted" style="font-size: 2rem;"></i>
+                                <p class="text-muted mt-2">No image analyses found</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit User Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin_update_user_role', user_id=user.id) }}">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" name="name" value="{{ user.name or '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="text" class="form-control" name="phone" value="{{ user.phone or '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Region</label>
+                            <input type="text" class="form-control" name="region" value="{{ user.region or '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Farm Size</label>
+                            <input type="text" class="form-control" name="farm_size" value="{{ user.farm_size or '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Primary Crop</label>
+                            <input type="text" class="form-control" name="primary_crop" value="{{ user.primary_crop or '' }}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Experience Level</label>
+                            <select class="form-select" name="experience_level">
+                                <option value="" {% if not user.experience_level %}selected{% endif %}>Select Level</option>
+                                <option value="beginner" {% if user.experience_level == 'beginner' %}selected{% endif %}>Beginner</option>
+                                <option value="intermediate" {% if user.experience_level == 'intermediate' %}selected{% endif %}>Intermediate</option>
+                                <option value="expert" {% if user.experience_level == 'expert' %}selected{% endif %}>Expert</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Role</label>
+                            <select class="form-select" name="role" required>
+                                <option value="farmer" {% if user.role == 'farmer' %}selected{% endif %}>Farmer</option>
+                                <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                                <option value="agent" {% if user.role == 'agent' %}selected{% endif %}>Agent</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">About/Bio</label>
+                            <textarea class="form-control" name="about" rows="2">{{ user.about or '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete User Modal -->
+{% if current_user.id != user.id and user.role != 'admin' %}
+<div class="modal fade" id="deleteUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>Warning!</strong> This will permanently delete user: <strong>{{ user.email }}</strong>
+                    <br><br>
+                    All associated data will be deleted:
+                    <ul>
+                        <li>User account</li>
+                        <li>{{ total_chats }} chat records</li>
+                        <li>{{ total_images }} image analyses</li>
+                        <li>All user preferences</li>
+                    </ul>
+                    This action cannot be undone!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ url_for('admin_delete_user', user_id=user.id) }}">
+                    <button type="submit" class="btn btn-danger">Delete Permanently</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Initialize tabs
+document.addEventListener('DOMContentLoaded', function() {
+    var tabEl = document.querySelector('button[data-bs-toggle="tab"]');
+    if (tabEl) {
+        tabEl.click();
+    }
+});
+</script>
+{% endblock %}

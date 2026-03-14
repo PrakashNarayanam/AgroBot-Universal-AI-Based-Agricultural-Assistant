@@ -1,0 +1,408 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - AI-AgroBot{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-success text-black">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="display-5 fw-bold mb-3">Admin Dashboard</h1>
+                            <p class="lead mb-0">Manage AI-AgroBot platform and monitor system health</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <div class="display-6 mb-2">{{ total_users }}</div>
+                            <small>Total Users</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Total Chats</h6>
+                            <h4 class="mb-0">{{ total_chats }}</h4>
+                            <small>All conversations</small>
+                        </div>
+                        <div class="rounded-circle bg-success bg-opacity-10 p-3">
+                            <i class="bi bi-chat-dots-fill text-success fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Today's Activity</h6>
+                            <h4 class="mb-0">{{ todays_chats }}</h4>
+                            <small>Today's chats</small>
+                        </div>
+                        <div class="rounded-circle bg-info bg-opacity-10 p-3">
+                            <i class="bi bi-activity text-info fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Image Analyses</h6>
+                            <h4 class="mb-0">{{ total_images }}</h4>
+                            <small>Total images processed</small>
+                        </div>
+                        <div class="rounded-circle bg-warning bg-opacity-10 p-3">
+                            <i class="bi bi-camera-fill text-warning fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">New Users (Week)</h6>
+                            <h4 class="mb-0">{{ new_users_week }}</h4>
+                            <small>Last 7 days</small>
+                        </div>
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                            <i class="bi bi-person-plus-fill text-primary fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Recent Users -->
+            <div class="card mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Users</h5>
+                    <a href="{{ url_for('admin_users') }}" class="btn btn-sm btn-success">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Region</th>
+                                    <th>Role</th>
+                                    <th>Joined</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if user.profile_picture %}
+                                            <img src="{{ url_for('uploaded_file', filename=user.profile_picture) }}"
+                                                 class="rounded-circle me-2" width="30" height="30" alt="">
+                                            {% else %}
+                                            <div class="rounded-circle bg-secondary me-2 d-flex align-items-center justify-content-center"
+                                                 style="width: 30px; height: 30px;">
+                                                <i class="bi bi-person text-white"></i>
+                                            </div>
+                                            {% endif %}
+                                            {{ user.name or 'N/A' }}
+                                        </div>
+                                    </td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.region or 'N/A' }}</td>
+                                    <td>
+                                        <span class="badge {% if user.role == 'admin' %}bg-danger{% else %}bg-success{% endif %}">
+                                            {{ user.role }}
+                                        </span>
+                                    </td>
+                                    <td>{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else 'N/A' }}</td>
+                                    <td>
+                                        <a href="{{ url_for('admin_view_user', user_id=user.id) }}"
+                                           class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Chats -->
+            <div class="card mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Chats</h5>
+                    <a href="{{ url_for('admin_chats') }}" class="btn btn-sm btn-success">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>User</th>
+                                    <th>Question</th>
+                                    <th>Response</th>
+                                    <th>Time</th>
+                                    <th>Type</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for chat in chats %}
+                                <tr>
+                                    <td>{{ chat.id }}</td>
+                                    <td>
+                                        {% set user = chat.user %}
+                                        {% if user %}
+                                        {{ user.name or user.email }}
+                                        {% else %}
+                                        <span class="text-muted">Deleted User</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-truncate" style="max-width: 150px;">
+                                        {{ chat.user_message[:50] if chat.user_message else '' }}...
+                                    </td>
+                                    <td class="text-truncate" style="max-width: 150px;">
+                                        {{ chat.bot_response[:50] if chat.bot_response else '' }}...
+                                    </td>
+                                    <td>{{ chat.created_at.strftime('%H:%M') if chat.created_at else 'N/A' }}</td>
+                                    <td>
+                                        <span class="badge {% if chat.chat_type == 'image' %}bg-warning{% else %}bg-info{% endif %}">
+                                            {{ chat.chat_type or 'text' }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- System Status -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">System Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Database</span>
+                            <span class="fw-bold text-success">Connected</span>
+                        </div>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar bg-success" style="width: 100%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>AI Model</span>
+                            {% if gemini_status %}
+                                <span class="fw-bold text-success">Active</span>
+                            {% else %}
+                                <span class="fw-bold text-warning">Checking...</span>
+                            {% endif %}
+                        </div>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar bg-success" style="width: 100%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Active Users</span>
+                            <span class="fw-bold text-info">{{ active_users|length }}</span>
+                        </div>
+                        <div class="progress" style="height: 5px;">
+                            <div class="progress-bar bg-info" style="width: 75%"></div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('admin_system_health') }}" class="btn btn-sm btn-outline-success w-100">
+                            <i class="bi bi-heart-pulse me-2"></i>Detailed Health Check
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('admin_users') }}" class="btn btn-outline-success">
+                            <i class="bi bi-people me-2"></i>Manage Users
+                        </a>
+                        <a href="{{ url_for('admin_chats') }}" class="btn btn-outline-success">
+                            <i class="bi bi-chat-dots me-2"></i>View All Chats
+                        </a>
+                        <a href="{{ url_for('admin_knowledge_base') }}" class="btn btn-outline-warning">
+                            <i class="bi bi-journal-text me-2"></i>Knowledge Base
+                        </a>
+                        <a href="{{ url_for('admin_analytics') }}" class="btn btn-outline-info">
+                            <i class="bi bi-bar-chart me-2"></i>Analytics
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Users -->
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Most Active Users</h5>
+                </div>
+                <div class="card-body">
+                    {% if active_users %}
+                    <div class="list-group">
+                        {% for user_data in active_users %}
+                        {% set user = user_data[0] %}
+                        {% set chat_count = user_data[1] %}
+                        <a href="{{ url_for('admin_view_user', user_id=user.id) }}"
+                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                {% if user.profile_picture %}
+                                <img src="{{ url_for('uploaded_file', filename=user.profile_picture) }}"
+                                     class="rounded-circle me-2" width="30" height="30" alt="">
+                                {% else %}
+                                <div class="rounded-circle bg-secondary me-2 d-flex align-items-center justify-content-center"
+                                     style="width: 30px; height: 30px;">
+                                    <i class="bi bi-person text-white"></i>
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <div class="fw-bold">{{ user.name or user.email[:20] }}</div>
+                                    <small class="text-muted">{{ user.role|title }}</small>
+                                </div>
+                            </div>
+                            <span class="badge bg-success rounded-pill">{{ chat_count }}</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="bi bi-people text-muted" style="font-size: 2rem;"></i>
+                        <p class="text-muted mt-2">No active users</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usage Statistics -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">User Distribution by Region</h5>
+                </div>
+                <div class="card-body">
+                    {% if regions %}
+                    <div class="row">
+                        {% for region in regions %}
+                        <div class="col-md-3 mb-3">
+                            <div class="card border-light">
+                                <div class="card-body text-center">
+                                    <h6>{{ region[0] or 'Unknown' }}</h6>
+                                    <h3 class="text-success">{{ region[1] }}</h3>
+                                    <small class="text-muted">Users</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="bi bi-geo-alt text-muted" style="font-size: 2rem;"></i>
+                        <p class="text-muted mt-2">No region data available</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Clear Modal -->
+<div class="modal fade" id="clearModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Clear Chat History</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    This will delete ALL chat history for ALL users. This action cannot be undone.
+                </div>
+                <p>Type <strong>DELETE ALL</strong> to confirm:</p>
+                <input type="text" class="form-control" id="confirmDelete">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmClearBtn" disabled>
+                    Clear All Chats
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Clear chat confirmation
+    $('#confirmDelete').on('keyup', function() {
+        $('#confirmClearBtn').prop('disabled', $(this).val() !== 'DELETE ALL');
+    });
+
+    $('#confirmClearBtn').click(function() {
+        $.post('{{ url_for("admin_clear_all_chats") }}', function(response) {
+            if (response) {
+                location.reload();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+    .search-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        background: rgba(255,255,255,0.9);
+        backdrop-filter: blur(5px);
+    }
+    .search-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 30px rgba(0,0,0,0.1) !important;
+    }
+    .category-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        border-radius: 30px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        background: rgba(var(--bs-primary-rgb), 0.1);
+        color: var(--bs-primary);
+    }
+    .tag-badge {
+        background: #f0f2f5;
+        color: #2c3e50;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        margin-right: 5px;
+        margin-bottom: 5px;
+        display: inline-block;
+    }
+    .filter-sidebar {
+        background: white;
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    .stat-badge {
+        background: #e9ecef;
+        border-radius: 20px;
+        padding: 4px 10px;
+        font-size: 0.8rem;
+        margin-right: 8px;
+    }
+    .result-count {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 30px;
+        display: inline-block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Breadcrumb with gradient -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb bg-light p-3 rounded-3">
+            <li class="breadcrumb-item"><a href="{{ url_for('community_forum') }}" class="text-decoration-none"><i class="bi bi-house-door-fill me-1"></i>Community</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-search me-1"></i>Search: "{{ query }}"</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Filter Sidebar (optional) -->
+        <div class="col-lg-3 mb-4">
+            <div class="filter-sidebar sticky-top" style="top: 80px;">
+                <h5 class="mb-3"><i class="bi bi-funnel-fill me-2 text-primary"></i>Filter Results</h5>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Category</label>
+                    <select class="form-select form-select-sm" id="categoryFilter">
+                        <option value="all">All Categories</option>
+                        {% for cat in categories %}  <!-- you need to pass categories from backend -->
+                        <option value="{{ cat.id }}">{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Sort by</label>
+                    <select class="form-select form-select-sm" id="sortFilter">
+                        <option value="recent">Most Recent</option>
+                        <option value="replies">Most Replies</option>
+                        <option value="views">Most Views</option>
+                        <option value="likes">Most Liked</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Date range</label>
+                    <div class="d-flex gap-2">
+                        <input type="date" class="form-control form-control-sm" placeholder="From">
+                        <input type="date" class="form-control form-control-sm" placeholder="To">
+                    </div>
+                </div>
+                <button class="btn btn-primary w-100" onclick="applyFilters()"><i class="bi bi-check2-circle me-1"></i>Apply Filters</button>
+            </div>
+        </div>
+
+        <!-- Search Results -->
+        <div class="col-lg-9">
+            <!-- Header with result count and active filters -->
+            <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
+                <div>
+                    <span class="result-count me-2">{{ threads|length }} thread(s) found</span>
+                    <span class="text-muted">for "{{ query }}"</span>
+                </div>
+                <div class="mt-2 mt-sm-0">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button class="btn btn-outline-secondary active" id="gridViewBtn"><i class="bi bi-grid-3x3-gap-fill"></i></button>
+                        <button class="btn btn-outline-secondary" id="listViewBtn"><i class="bi bi-list-ul"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            {% if threads %}
+                <div class="row" id="resultsContainer">
+                    {% for thread in threads %}
+                    <div class="col-md-6 mb-4 result-item" data-category="{{ thread.category_id }}" data-replies="{{ thread.posts|length }}" data-views="{{ thread.views }}" data-likes="{{ thread.likes_count|default(0) }}" data-date="{{ thread.created_at }}">
+                        <div class="card search-card h-100 shadow-sm">
+                            <div class="card-body">
+                                <!-- Category & Pin -->
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="category-badge" style="background: rgba(var(--bs-{{ thread.category.color|default('primary') }}-rgb), 0.1); color: var(--bs-{{ thread.category.color|default('primary') }});">
+                                        <i class="bi {{ thread.category.icon|default('bi-folder') }} me-1"></i>{{ thread.category.name }}
+                                    </span>
+                                    {% if thread.is_pinned %}
+                                        <span class="badge bg-warning text-dark"><i class="bi bi-pin-fill me-1"></i>Pinned</span>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Title -->
+                                <h5 class="card-title">
+                                    <a href="{{ url_for('view_thread', thread_id=thread.id) }}" class="text-decoration-none text-dark">
+                                        {{ thread.title }}
+                                    </a>
+                                </h5>
+
+                                <!-- Preview -->
+                                <p class="card-text text-muted small">{{ thread.content | truncate(120) }}</p>
+
+                                <!-- Tags -->
+                                {% if thread.tags %}
+                                <div class="mb-2">
+                                    {% for tag in thread.tags[:3] %}
+                                        <span class="tag-badge">#{{ tag.name }}</span>
+                                    {% endfor %}
+                                    {% if thread.tags|length > 3 %}
+                                        <span class="tag-badge">+{{ thread.tags|length - 3 }} more</span>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+
+                                <!-- Meta info -->
+                                <div class="d-flex flex-wrap align-items-center mt-3 pt-2 border-top">
+                                    <div class="d-flex align-items-center me-3">
+                                        <div class="avatar-sm me-2" style="width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(145deg, #ff6b6b, #556270); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px;">
+                                            {{ thread.user.name[:2].upper() }}
+                                        </div>
+                                        <span class="small">{{ thread.user.name }}</span>
+                                    </div>
+                                    <span class="stat-badge me-2"><i class="bi bi-clock me-1"></i>{{ thread.created_at | timeago }}</span>
+                                    <span class="stat-badge me-2"><i class="bi bi-chat me-1"></i>{{ thread.posts|length }}</span>
+                                    <span class="stat-badge me-2"><i class="bi bi-eye me-1"></i>{{ thread.views }}</span>
+                                    <span class="stat-badge"><i class="bi bi-heart-fill text-danger me-1"></i>{{ thread.likes_count|default(0) }}</span>
+                                </div>
+
+                                <!-- Solution indicator if any -->
+                                {% if thread.solution_count and thread.solution_count > 0 %}
+                                <div class="mt-2">
+                                    <span class="badge bg-success"><i class="bi bi-check-circle-fill me-1"></i>{{ thread.solution_count }} solution(s)</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination (if needed) -->
+                <nav class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                    </ul>
+                </nav>
+            {% else %}
+                <div class="alert alert-info d-flex align-items-center" role="alert">
+                    <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+                    <div>
+                        <h5 class="alert-heading">No threads found</h5>
+                        <p class="mb-0">We couldn't find any threads matching "{{ query }}". Try different keywords or browse the categories.</p>
+                        <hr>
+                        <a href="{{ url_for('community_forum') }}" class="btn btn-outline-primary btn-sm"><i class="bi bi-arrow-left me-1"></i>Back to Community</a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for filtering and view toggle -->
+<script>
+    function applyFilters() {
+        // You would implement filter logic here using fetch or DOM filtering
+        // For now, we'll just reload with query params
+        const category = document.getElementById('categoryFilter').value;
+        const sort = document.getElementById('sortFilter').value;
+        window.location.href = "{{ url_for('search_threads') }}?q={{ query }}&category=" + category + "&sort=" + sort;
+    }
+
+    // Simple grid/list toggle
+    document.getElementById('gridViewBtn')?.addEventListener('click', function() {
+        document.getElementById('resultsContainer').classList.remove('list-view');
+        document.getElementById('gridViewBtn').classList.add('active');
+        document.getElementById('listViewBtn').classList.remove('active');
+        // You may also adjust column classes
+    });
+    document.getElementById('listViewBtn')?.addEventListener('click', function() {
+        document.getElementById('resultsContainer').classList.add('list-view');
+        document.getElementById('listViewBtn').classList.add('active');
+        document.getElementById('gridViewBtn').classList.remove('active');
+    });
+</script>
+
+<style>
+    /* Optional list view style */
+    #resultsContainer.list-view .col-md-6 {
+        width: 100%;
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+    .avatar-sm {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(145deg, #ff6b6b, #556270);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    .category-badge i {
+        font-size: 0.9rem;
+    }
+    .tag-badge:hover {
+        background: #dee2e6;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,698 @@
+
+{% extends "base.html" %}
+
+{% block title %}Register - AI-AgroBot{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <!-- Progress Steps -->
+            <div class="mb-5">
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="d-flex justify-content-between mt-2">
+                    <div class="text-center">
+                        <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">1</div>
+                        <p class="small mt-1">Personal Info</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="rounded-circle bg-light text-muted d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">2</div>
+                        <p class="small mt-1">Farm Details</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="rounded-circle bg-light text-muted d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">3</div>
+                        <p class="small mt-1">Preferences</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="rounded-circle bg-light text-muted d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">4</div>
+                        <p class="small mt-1">Review</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-success text-white py-4">
+                    <div class="text-center">
+                        <i class="bi bi-person-plus-fill display-4 mb-3"></i>
+                        <h2 class="mb-0">Create Your Account</h2>
+                        <p class="opacity-75 mb-0">Join thousands of smart farmers</p>
+                    </div>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <form method="POST" action="{{ url_for('register') }}" id="registrationForm">
+                        <!-- Step 1: Personal Information -->
+                        <div class="form-step active" id="step1">
+                            <h4 class="mb-4">Personal Information</h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="name" class="form-label">Full Name *</label>
+                                    <input type="text" class="form-control" id="name" name="name" required
+                                           placeholder="Enter your full name" value="{{ request.form.name if request.form.name else '' }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label">Email Address *</label>
+                                    <input type="email" class="form-control" id="email" name="email" required
+                                           placeholder="you@example.com" value="{{ request.form.email if request.form.email else '' }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="phone" class="form-label">Phone Number *</label>
+                                    <input type="tel" class="form-control" id="phone" name="phone" required
+                                           placeholder="+91 9876543210" value="{{ request.form.phone if request.form.phone else '' }}">
+                                    <div class="form-text">We'll send OTP for verification</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="whatsapp" class="form-label">WhatsApp Number</label>
+                                    <input type="tel" class="form-control" id="whatsapp" name="whatsapp"
+                                           placeholder="Optional - for alerts" value="{{ request.form.whatsapp if request.form.whatsapp else '' }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="dob" class="form-label">Date of Birth</label>
+                                    <input type="date" class="form-control" id="dob" name="dob"
+                                           value="{{ request.form.dob if request.form.dob else '' }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="gender" class="form-label">Gender</label>
+                                    <select class="form-select" id="gender" name="gender">
+                                        <option value="">Select Gender</option>
+                                        <option value="male" {% if request.form.gender == 'male' %}selected{% endif %}>Male</option>
+                                        <option value="female" {% if request.form.gender == 'female' %}selected{% endif %}>Female</option>
+                                        <option value="other" {% if request.form.gender == 'other' %}selected{% endif %}>Other</option>
+                                        <option value="prefer_not_to_say" {% if request.form.gender == 'prefer_not_to_say' %}selected{% endif %}>Prefer not to say</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-4">
+                                <div></div>
+                                <button type="button" class="btn btn-success next-step">Next: Farm Details <i class="bi bi-arrow-right ms-1"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Farm Information -->
+                        <div class="form-step d-none" id="step2">
+                            <h4 class="mb-4">Farm Information</h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="farm_name" class="form-label">Farm Name</label>
+                                    <input type="text" class="form-control" id="farm_name" name="farm_name"
+                                           placeholder="e.g., Green Valley Farm" value="{{ request.form.farm_name if request.form.farm_name else '' }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="farm_size" class="form-label">Farm Size *</label>
+                                    <select class="form-select" id="farm_size" name="farm_size" required>
+                                        <option value="">Select farm size</option>
+                                        <option value="0-1" {% if request.form.farm_size == '0-1' %}selected{% endif %}>0-1 acre</option>
+                                        <option value="1-5" {% if request.form.farm_size == '1-5' %}selected{% endif %}>1-5 acres</option>
+                                        <option value="5-10" {% if request.form.farm_size == '5-10' %}selected{% endif %}>5-10 acres</option>
+                                        <option value="10-25" {% if request.form.farm_size == '10-25' %}selected{% endif %}>10-25 acres</option>
+                                        <option value="25-50" {% if request.form.farm_size == '25-50' %}selected{% endif %}>25-50 acres</option>
+                                        <option value="50+" {% if request.form.farm_size == '50+' %}selected{% endif %}>50+ acres</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="primary_crop" class="form-label">Primary Crop *</label>
+                                    <select class="form-select" id="primary_crop" name="primary_crop" required>
+                                        <option value="">Select main crop</option>
+                                        <optgroup label="Cereals">
+                                            <option value="Rice">Rice</option>
+                                            <option value="Wheat">Wheat</option>
+                                            <option value="Maize">Maize</option>
+                                            <option value="Barley">Barley</option>
+                                            <option value="Millet">Millet</option>
+                                        </optgroup>
+                                        <optgroup label="Pulses">
+                                            <option value="Chickpea">Chickpea</option>
+                                            <option value="Lentil">Lentil</option>
+                                            <option value="Pigeon Pea">Pigeon Pea</option>
+                                            <option value="Mung Bean">Mung Bean</option>
+                                        </optgroup>
+                                        <optgroup label="Vegetables">
+                                            <option value="Tomato">Tomato</option>
+                                            <option value="Potato">Potato</option>
+                                            <option value="Onion">Onion</option>
+                                            <option value="Brinjal">Brinjal</option>
+                                        </optgroup>
+                                        <optgroup label="Fruits">
+                                            <option value="Mango">Mango</option>
+                                            <option value="Banana">Banana</option>
+                                            <option value="Citrus">Citrus</option>
+                                            <option value="Apple">Apple</option>
+                                        </optgroup>
+                                        <optgroup label="Cash Crops">
+                                            <option value="Cotton">Cotton</option>
+                                            <option value="Sugarcane">Sugarcane</option>
+                                            <option value="Tobacco">Tobacco</option>
+                                            <option value="Tea">Tea</option>
+                                            <option value="Coffee">Coffee</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="secondary_crops" class="form-label">Secondary Crops</label>
+                                    <input type="text" class="form-control" id="secondary_crops" name="secondary_crops"
+                                           placeholder="e.g., Wheat, Soybean" value="{{ request.form.secondary_crops if request.form.secondary_crops else '' }}">
+                                    <div class="form-text">Separate with commas</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="soil_type" class="form-label">Soil Type</label>
+                                    <select class="form-select" id="soil_type" name="soil_type">
+                                        <option value="">Select soil type</option>
+                                        <option value="Loamy">Loamy</option>
+                                        <option value="Clay">Clay</option>
+                                        <option value="Sandy">Sandy</option>
+                                        <option value="Silty">Silty</option>
+                                        <option value="Peaty">Peaty</option>
+                                        <option value="Chalky">Chalky</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="irrigation_type" class="form-label">Irrigation Type</label>
+                                    <select class="form-select" id="irrigation_type" name="irrigation_type">
+                                        <option value="">Select irrigation method</option>
+                                        <option value="Drip">Drip Irrigation</option>
+                                        <option value="Sprinkler">Sprinkler</option>
+                                        <option value="Flood">Flood/Furrow</option>
+                                        <option value="Manual">Manual</option>
+                                        <option value="Rainfed">Rainfed</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="region" class="form-label">Region/State *</label>
+                                    <input type="text" class="form-control" id="region" name="region" required
+                                           placeholder="e.g., Punjab, Maharashtra" value="{{ request.form.region if request.form.region else '' }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="district" class="form-label">District</label>
+                                    <input type="text" class="form-control" id="district" name="district"
+                                           placeholder="e.g., Ludhiana, Nagpur" value="{{ request.form.district if request.form.district else '' }}">
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="farm_address" class="form-label">Farm Address</label>
+                                    <textarea class="form-control" id="farm_address" name="farm_address" rows="2"
+                                              placeholder="Full farm address">{{ request.form.farm_address if request.form.farm_address else '' }}</textarea>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-outline-secondary prev-step"><i class="bi bi-arrow-left me-1"></i> Back</button>
+                                <button type="button" class="btn btn-success next-step">Next: Preferences <i class="bi bi-arrow-right ms-1"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Preferences & Experience -->
+                        <div class="form-step d-none" id="step3">
+                            <h4 class="mb-4">Preferences & Experience</h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="experience_level" class="form-label">Experience Level *</label>
+                                    <select class="form-select" id="experience_level" name="experience_level" required>
+                                        <option value="">Select experience</option>
+                                        <option value="beginner" {% if request.form.experience_level == 'beginner' %}selected{% endif %}>Beginner (0-2 years)</option>
+                                        <option value="intermediate" {% if request.form.experience_level == 'intermediate' %}selected{% endif %}>Intermediate (2-5 years)</option>
+                                        <option value="experienced" {% if request.form.experience_level == 'experienced' %}selected{% endif %}>Experienced (5-10 years)</option>
+                                        <option value="expert" {% if request.form.experience_level == 'expert' %}selected{% endif %}>Expert (10+ years)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="preferred_language" class="form-label">Preferred Language *</label>
+                                    <select class="form-select" id="preferred_language" name="preferred_language" required>
+                                        <option value="en" {% if request.form.preferred_language == 'en' %}selected{% endif %}>English</option>
+                                        <option value="hi" {% if request.form.preferred_language == 'hi' %}selected{% endif %}>Hindi (हिंदी)</option>
+                                        <option value="bn" {% if request.form.preferred_language == 'bn' %}selected{% endif %}>Bengali (বাংলা)</option>
+                                        <option value="te" {% if request.form.preferred_language == 'te' %}selected{% endif %}>Telugu (తెలుగు)</option>
+                                        <option value="mr" {% if request.form.preferred_language == 'mr' %}selected{% endif %}>Marathi (मराठी)</option>
+                                        <option value="ta" {% if request.form.preferred_language == 'ta' %}selected{% endif %}>Tamil (தமிழ்)</option>
+                                        <option value="gu" {% if request.form.preferred_language == 'gu' %}selected{% endif %}>Gujarati (ગુજરાતી)</option>
+                                        <option value="ml" {% if request.form.preferred_language == 'ml' %}selected{% endif %}>Malayalam (മലയാളം)</option>
+                                        <option value="kn" {% if request.form.preferred_language == 'kn' %}selected{% endif %}>Kannada (ಕನ್ನಡ)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label">Notification Preferences</label>
+                                    <div class="border rounded p-3">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="notify_weather" name="notify_weather" checked>
+                                            <label class="form-check-label" for="notify_weather">
+                                                Weather alerts & forecasts
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="notify_pests" name="notify_pests" checked>
+                                            <label class="form-check-label" for="notify_pests">
+                                                Pest & disease warnings
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="notify_market" name="notify_market" checked>
+                                            <label class="form-check-label" for="notify_market">
+                                                Market price updates
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="notify_tips" name="notify_tips" checked>
+                                            <label class="form-check-label" for="notify_tips">
+                                                Daily farming tips
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label">Areas of Interest</label>
+                                    <div class="border rounded p-3">
+                                        <div class="row">
+                                            <div class="col-6 col-md-4">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="interest_organic" name="interest_organic">
+                                                    <label class="form-check-label" for="interest_organic">Organic Farming</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-md-4">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="interest_hydroponics" name="interest_hydroponics">
+                                                    <label class="form-check-label" for="interest_hydroponics">Hydroponics</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-md-4">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="interest_precision" name="interest_precision">
+                                                    <label class="form-check-label" for="interest_precision">Precision Farming</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-md-4">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="interest_dairy" name="interest_dairy">
+                                                    <label class="form-check-label" for="interest_dairy">Dairy Farming</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-md-4">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="interest_poultry" name="interest_poultry">
+                                                    <label class="form-check-label" for="interest_poultry">Poultry</label>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 col-md-4">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="interest_fisheries" name="interest_fisheries">
+                                                    <label class="form-check-label" for="interest_fisheries">Fisheries</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-outline-secondary prev-step"><i class="bi bi-arrow-left me-1"></i> Back</button>
+                                <button type="button" class="btn btn-success next-step">Next: Account Setup <i class="bi bi-arrow-right ms-1"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Account Setup & Review -->
+                        <div class="form-step d-none" id="step4">
+                            <h4 class="mb-4">Account Setup & Review</h4>
+
+                            <!-- Review Summary -->
+                            <div class="alert alert-info mb-4">
+                                <h6><i class="bi bi-info-circle me-2"></i>Review Your Information</h6>
+                                <p class="mb-0 small">Please review all details before creating your account</p>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="password" class="form-label">Password *</label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" id="password" name="password" required
+                                               placeholder="Minimum 8 characters">
+                                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="password-strength mt-2">
+                                        <div class="progress" style="height: 5px;">
+                                            <div class="progress-bar" id="passwordStrength" role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                        <small id="passwordFeedback" class="form-text"></small>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="confirm_password" class="form-label">Confirm Password *</label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required
+                                               placeholder="Re-enter your password">
+                                        <button class="btn btn-outline-secondary" type="button" id="toggleConfirmPassword">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-text" id="passwordMatch"></div>
+                                </div>
+
+                                <!-- Profile Photo -->
+                                <div class="col-md-12">
+                                    <label for="profile_photo" class="form-label">Profile Photo (Optional)</label>
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-light border d-flex align-items-center justify-content-center me-3"
+                                             style="width: 80px; height: 80px;">
+                                            <i class="bi bi-person text-muted" style="font-size: 2rem;"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <input type="file" class="form-control" id="profile_photo" name="profile_photo" accept="image/*">
+                                            <div class="form-text">Max 2MB. JPG, PNG, or GIF</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Terms and Privacy -->
+                                <div class="col-md-12">
+                                    <div class="border rounded p-3">
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="terms" required>
+                                            <label class="form-check-label" for="terms">
+                                                I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and <a href="#" class="text-decoration-none">Privacy Policy</a> *
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="newsletter" checked>
+                                            <label class="form-check-label" for="newsletter">
+                                                Send me farming tips, market updates, and educational content
+                                            </label>
+                                        </div>
+                                        <div class="form-check mt-2">
+                                            <input class="form-check-input" type="checkbox" id="share_data">
+                                            <label class="form-check-label" for="share_data">
+                                                Share anonymized farm data to help improve AI models (Optional)
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Referral Code -->
+                                <div class="col-md-6">
+                                    <label for="referral_code" class="form-label">Referral Code (Optional)</label>
+                                    <input type="text" class="form-control" id="referral_code" name="referral_code"
+                                           placeholder="Enter if you have one" value="{{ request.form.referral_code if request.form.referral_code else '' }}">
+                                    <div class="form-text">Get 500 bonus points when you refer a friend</div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-outline-secondary prev-step"><i class="bi bi-arrow-left me-1"></i> Back</button>
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="bi bi-person-plus me-2"></i>Create Account
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Alternative Signup Methods -->
+                    <div class="text-center mt-4">
+                        <div class="position-relative">
+                            <hr>
+                            <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted">Or sign up with</span>
+                        </div>
+                        <div class="d-flex justify-content-center gap-3 mt-4">
+                            <button type="button" class="btn btn-outline-primary">
+                                <i class="bi bi-google"></i> Google
+                            </button>
+                            <button type="button" class="btn btn-outline-dark">
+                                <i class="bi bi-facebook"></i> Facebook
+                            </button>
+                            <button type="button" class="btn btn-outline-info">
+                                <i class="bi bi-twitter"></i> Twitter
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Login Link -->
+                    <div class="text-center mt-4">
+                        <p class="mb-0">Already have an account? <a href="{{ url_for('login') }}" class="text-decoration-none fw-bold">Sign In</a></p>
+                        <p class="small text-muted mt-2">By creating an account, you agree to our Terms and acknowledge our Privacy Policy</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enhanced Benefits Section -->
+            <div class="mt-5">
+                <h4 class="text-center mb-4">Why Join AI-AgroBot?</h4>
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="text-center p-3 border rounded h-100">
+                            <i class="bi bi-robot text-success display-6 mb-3"></i>
+                            <h5>AI Assistant</h5>
+                            <p class="small mb-0">24/7 crop advisory and problem-solving</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 border rounded h-100">
+                            <i class="bi bi-camera text-success display-6 mb-3"></i>
+                            <h5>Image Analysis</h5>
+                            <p class="small mb-0">Disease detection with 95% accuracy</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 border rounded h-100">
+                            <i class="bi bi-graph-up-arrow text-success display-6 mb-3"></i>
+                            <h5>Market Insights</h5>
+                            <p class="small mb-0">Real-time prices and demand predictions</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 border rounded h-100">
+                            <i class="bi bi-cloud-sun text-success display-6 mb-3"></i>
+                            <h5>Weather Smart</h5>
+                            <p class="small mb-0">Hyper-local weather forecasts and alerts</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-4 mt-2">
+                    <div class="col-md-3">
+                        <div class="text-center p-3 border rounded h-100">
+                            <i class="bi bi-calculator text-success display-6 mb-3"></i>
+                            <h5>Cost Calculator</h5>
+                            <p class="small mb-0">Optimize input costs and maximize profit</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 border rounded h-100">
+                            <i class="bi bi-people-fill text-success display-6 mb-3"></i>
+                            <h5>Community</h5>
+                            <p class="small mb-0">Connect with 50,000+ farmers</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 border rounded h-100">
+                            <i class="bi bi-book text-success display-6 mb-3"></i>
+                            <h5>E-Learning</h5>
+                            <p class="small mb-0">Free courses and certification</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 border rounded h-100">
+                            <i class="bi bi-headset text-success display-6 mb-3"></i>
+                            <h5>Support</h5>
+                            <p class="small mb-0">Expert agronomists available</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Multi-step form navigation
+    let currentStep = 1;
+    const totalSteps = 4;
+
+    $('.next-step').on('click', function() {
+        if (validateStep(currentStep)) {
+            $(`#step${currentStep}`).removeClass('active').addClass('d-none');
+            currentStep++;
+            $(`#step${currentStep}`).removeClass('d-none').addClass('active');
+            updateProgressBar();
+        }
+    });
+
+    $('.prev-step').on('click', function() {
+        $(`#step${currentStep}`).removeClass('active').addClass('d-none');
+        currentStep--;
+        $(`#step${currentStep}`).removeClass('d-none').addClass('active');
+        updateProgressBar();
+    });
+
+    function updateProgressBar() {
+        const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+        $('.progress-bar').css('width', `${progress}%`);
+
+        // Update step indicators
+        $('.progress-indicator').removeClass('active');
+        $(`.progress-indicator[data-step="${currentStep}"]`).addClass('active');
+    }
+
+    // Step validation
+    function validateStep(step) {
+        let isValid = true;
+
+        $(`#step${step} [required]`).each(function() {
+            if (!$(this).val()) {
+                $(this).addClass('is-invalid');
+                isValid = false;
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+        // Special validation for email
+        if (step === 1) {
+            const email = $('#email').val();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (email && !emailRegex.test(email)) {
+                $('#email').addClass('is-invalid');
+                isValid = false;
+            }
+        }
+
+        // Special validation for passwords in step 4
+        if (step === 4) {
+            const password = $('#password').val();
+            const confirm = $('#confirm_password').val();
+
+            if (password.length < 8) {
+                $('#password').addClass('is-invalid');
+                isValid = false;
+            }
+
+            if (password !== confirm) {
+                $('#confirm_password').addClass('is-invalid');
+                isValid = false;
+            }
+        }
+
+        return isValid;
+    }
+
+    // Password strength indicator
+    $('#password').on('keyup', function() {
+        const password = $(this).val();
+        let strength = 0;
+        let feedback = '';
+
+        // Length check
+        if (password.length >= 8) strength += 25;
+        // Lowercase check
+        if (/[a-z]/.test(password)) strength += 25;
+        // Uppercase check
+        if (/[A-Z]/.test(password)) strength += 25;
+        // Number/Special char check
+        if (/[0-9!@#$%^&*]/.test(password)) strength += 25;
+
+        $('#passwordStrength').css('width', `${strength}%`);
+
+        // Color feedback
+        if (strength < 50) {
+            $('#passwordStrength').removeClass('bg-warning bg-success').addClass('bg-danger');
+            feedback = 'Weak password';
+        } else if (strength < 75) {
+            $('#passwordStrength').removeClass('bg-danger bg-success').addClass('bg-warning');
+            feedback = 'Medium strength';
+        } else {
+            $('#passwordStrength').removeClass('bg-danger bg-warning').addClass('bg-success');
+            feedback = 'Strong password';
+        }
+
+        $('#passwordFeedback').text(feedback);
+    });
+
+    // Password confirmation check
+    $('#confirm_password').on('keyup', function() {
+        const password = $('#password').val();
+        const confirm = $(this).val();
+
+        if (confirm.length > 0) {
+            if (password === confirm) {
+                $(this).removeClass('is-invalid').addClass('is-valid');
+                $('#passwordMatch').html('<span class="text-success"><i class="bi bi-check-circle-fill"></i> Passwords match</span>');
+            } else {
+                $(this).removeClass('is-valid').addClass('is-invalid');
+                $('#passwordMatch').html('<span class="text-danger"><i class="bi bi-exclamation-circle-fill"></i> Passwords do not match</span>');
+            }
+        } else {
+            $(this).removeClass('is-valid is-invalid');
+            $('#passwordMatch').text('');
+        }
+    });
+
+    // Toggle password visibility
+    $('#togglePassword').on('click', function() {
+        const passwordField = $('#password');
+        const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
+        passwordField.attr('type', type);
+        $(this).find('i').toggleClass('bi-eye bi-eye-slash');
+    });
+
+    $('#toggleConfirmPassword').on('click', function() {
+        const passwordField = $('#confirm_password');
+        const type = passwordField.attr('type') === 'password' ? 'text' : 'password';
+        passwordField.attr('type', type);
+        $(this).find('i').toggleClass('bi-eye bi-eye-slash');
+    });
+
+    // Phone number formatting
+    $('#phone, #whatsapp').on('input', function() {
+        let value = $(this).val().replace(/\D/g, '');
+        if (value.length > 0) {
+            if (value.length <= 10) {
+                value = value.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+            } else {
+                value = value.replace(/(\d{1})(\d{3})(\d{3})(\d{4})/, '+$1 ($2) $3-$4');
+            }
+        }
+        $(this).val(value);
+    });
+
+    // Auto-detect country code for Indian numbers
+    $('#phone, #whatsapp').on('blur', function() {
+        let value = $(this).val();
+        if (value && !value.includes('+')) {
+            if (value.replace(/\D/g, '').length === 10) {
+                $(this).val('+91 ' + value);
+            }
+        }
+    });
+
+    // Form submission validation
+    $('#registrationForm').on('submit', function(e) {
+        if (!validateStep(currentStep)) {
+            e.preventDefault();
+            alert('Please complete all required fields correctly.');
+            return false;
+        }
+
+        const password = $('#password').val();
+        const confirm = $('#confirm_password').val();
+
+        if (password.length < 8) {
+            e.preventDefault();
+            alert('Password must be at least 8 characters');
+            return false;
+        }
+
+        if (password !== confirm) {
+            e.preventDefault();
+            alert('Passwords do not match');
+            return false;
+        }
+
+        if (!$('#terms').is(':checked')) {
+            e.preventDefault();
+            alert('You must agree to the Terms of Service and Privacy Policy');
+            return false;
+        }
+
+        // Show loading state
+        $('button[type="submit"]').html('<span class="spinner-border spinner-border-sm me-2"></span>Creating Account...').prop('disabled', true);
+    });
+});
+</script>
+{% endblock %}

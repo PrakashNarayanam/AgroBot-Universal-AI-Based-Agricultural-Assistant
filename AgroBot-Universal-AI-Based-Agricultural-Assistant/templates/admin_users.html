@@ -1,0 +1,550 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-gradient-success text-black">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="display-5 fw-bold mb-3">User Management</h1>
+                            <p class="lead mb-0">Manage all AI-AgroBot users and their permissions</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <div class="display-6 mb-2">{{ users.total }}</div>
+                            <small>Total Users</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card border-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Active Today</h6>
+                            <h4 class="mb-0">142</h4>
+                            <small>Users online</small>
+                        </div>
+                        <div class="rounded-circle bg-success bg-opacity-10 p-3">
+                            <i class="bi bi-person-check text-success fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">New This Week</h6>
+                            <h4 class="mb-0">28</h4>
+                            <small>Registrations</small>
+                        </div>
+                        <div class="rounded-circle bg-info bg-opacity-10 p-3">
+                            <i class="bi bi-person-plus text-info fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Inactive</h6>
+                            <h4 class="mb-0">15</h4>
+                            <small>30+ days</small>
+                        </div>
+                        <div class="rounded-circle bg-warning bg-opacity-10 p-3">
+                            <i class="bi bi-person-x text-warning fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card border-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">Admins</h6>
+                            <h4 class="mb-0">3</h4>
+                            <small>Administrators</small>
+                        </div>
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                            <i class="bi bi-shield-check text-primary fs-3"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge filter-badge active" data-filter="all">All Users</span>
+                                <span class="badge filter-badge" data-filter="active">Active</span>
+                                <span class="badge filter-badge" data-filter="inactive">Inactive</span>
+                                <span class="badge filter-badge" data-filter="admin">Admins</span>
+                                <span class="badge filter-badge" data-filter="premium">Premium</span>
+                                <span class="badge filter-badge" data-filter="free">Free</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" class="form-control" placeholder="Search users..." id="userSearch">
+                                <button class="btn btn-success" type="button">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">All Users ({{ users.total }})</h5>
+                    <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                        <i class="bi bi-person-plus me-2"></i>Add User
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>User</th>
+                                    <th>Email</th>
+                                    <th>Region</th>
+                                    <th>Crop</th>
+                                    <th>Status</th>
+                                    <th>Role</th>
+                                    <th>Joined</th>
+                                    <th>Last Active</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users.items %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if user.profile_picture %}
+                                            <img src="{{ url_for('uploaded_file', filename=user.profile_picture) }}"
+                                                 class="rounded-circle me-2" width="30" height="30" alt="">
+                                            {% else %}
+                                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-2"
+                                                 style="width: 30px; height: 30px;">
+                                                <i class="bi bi-person text-muted"></i>
+                                            </div>
+                                            {% endif %}
+                                            <div>
+                                                <div class="fw-bold">{{ user.name or 'No Name' }}</div>
+                                                <small class="text-muted">{{ user.experience_level|default('N/A') }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.region or 'N/A' }}</td>
+                                    <td>
+                                        {% if user.primary_crop %}
+                                        <span class="badge bg-success">{{ user.primary_crop }}</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">None</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% set days_since = (now.date() - user.last_login.date()).days if user.last_login else 999 %}
+                                        {% if days_since == 0 %}
+                                        <span class="badge bg-success">Online</span>
+                                        {% elif days_since <= 7 %}
+                                        <span class="badge bg-info">Active</span>
+                                        {% elif days_since <= 30 %}
+                                        <span class="badge bg-warning">Inactive</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Offline</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if user.role == 'admin' %}bg-danger{% else %}bg-primary{% endif %}">
+                                            {{ user.role }}
+                                        </span>
+                                    </td>
+                                    <td>{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else 'N/A' }}</td>
+                                    <td>
+                                        {% if user.last_login %}
+                                        {{ user.last_login.strftime('%Y-%m-%d') }}
+                                        {% else %}
+                                        Never
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ url_for('admin_view_user', user_id=user.id) }}"
+                                               class="btn btn-outline-success" title="View">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <button class="btn btn-outline-primary edit-user"
+                                                    data-user-id="{{ user.id }}" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            {% if user.role != 'admin' and user.id != current_user.id %}
+                                            <button class="btn btn-outline-danger delete-user"
+                                                    data-user-id="{{ user.id }}" data-user-name="{{ user.name or user.email }}" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <!-- Pagination -->
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center mb-0">
+                            {% if users.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin_users', page=users.prev_num) }}">Previous</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Previous</span>
+                            </li>
+                            {% endif %}
+
+                            {% for page_num in users.iter_pages(left_edge=2, left_current=2, right_current=2, right_edge=2) %}
+                                {% if page_num %}
+                                    {% if page_num == users.page %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ page_num }}</span>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ url_for('admin_users', page=page_num) }}">{{ page_num }}</a>
+                                    </li>
+                                    {% endif %}
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if users.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('admin_users', page=users.next_num) }}">Next</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Next</span>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Bulk Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="selectAll">
+                                <label class="form-check-label" for="selectAll">Select All Users</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="onlyActive">
+                                <label class="form-check-label" for="onlyActive">Only Active Users</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="btn-group">
+                                <button class="btn btn-outline-success" id="exportUsers">
+                                    <i class="bi bi-download me-2"></i>Export
+                                </button>
+                                <button class="btn btn-outline-warning" id="sendBulkEmail">
+                                    <i class="bi bi-envelope me-2"></i>Email
+                                </button>
+                                <button class="btn btn-outline-danger" id="deleteSelected">
+                                    <i class="bi bi-trash me-2"></i>Delete
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" name="password" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" name="confirm_password" required>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Role</label>
+                            <select class="form-select" name="role">
+                                <option value="user">User</option>
+                                <option value="admin">Admin</option>
+                                <option value="moderator">Moderator</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="status">
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="suspended">Suspended</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Region</label>
+                            <input type="text" class="form-control" name="region">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Primary Crop</label>
+                            <select class="form-select" name="primary_crop">
+                                <option value="">Select crop</option>
+                                <option value="Wheat">Wheat</option>
+                                <option value="Rice">Rice</option>
+                                <option value="Corn">Corn</option>
+                                <option value="Soybean">Soybean</option>
+                                <option value="Cotton">Cotton</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Send Welcome Email</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="send_email" checked>
+                            <label class="form-check-label">
+                                Send welcome email with login instructions
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="addUser()">Add User</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm">
+                    <input type="hidden" id="editUserId">
+                    <!-- Form will be populated by JavaScript -->
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="saveUser()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone. All user data including chats and images will be deleted.
+                </div>
+                <p>Are you sure you want to delete user <strong id="deleteUserName">[User Name]</strong>?</p>
+                <p>Type <strong>DELETE</strong> to confirm:</p>
+                <input type="text" class="form-control" id="confirmDelete">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>Delete User</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Filter badges
+    $('.filter-badge').click(function() {
+        $('.filter-badge').removeClass('active');
+        $(this).addClass('active');
+        // Implement filter logic
+    });
+
+    // Search functionality
+    $('#userSearch').on('input', function() {
+        const searchTerm = $(this).val().toLowerCase();
+        $('tbody tr').each(function() {
+            const text = $(this).text().toLowerCase();
+            $(this).toggle(text.includes(searchTerm));
+        });
+    });
+
+    // Select all checkbox
+    $('#selectAll').change(function() {
+        const isChecked = $(this).is(':checked');
+        $('tbody input[type="checkbox"]').prop('checked', isChecked);
+    });
+
+    // Edit user
+    $('.edit-user').click(function() {
+        const userId = $(this).data('user-id');
+        // Load user data and populate edit modal
+        $('#editUserModal').modal('show');
+    });
+
+    // Delete user
+    $('.delete-user').click(function() {
+        const userId = $(this).data('user-id');
+        const userName = $(this).data('user-name');
+
+        $('#deleteUserName').text(userName);
+        $('#confirmDeleteBtn').data('user-id', userId);
+        $('#deleteModal').modal('show');
+    });
+
+    // Delete confirmation
+    $('#confirmDelete').on('keyup', function() {
+        $('#confirmDeleteBtn').prop('disabled', $(this).val() !== 'DELETE');
+    });
+
+    $('#confirmDeleteBtn').click(function() {
+        const userId = $(this).data('user-id');
+        // AJAX call to delete user
+        $.post(`/admin/delete_user/${userId}`, function(response) {
+            if (response) {
+                location.reload();
+            }
+        });
+    });
+
+    // Export users
+    $('#exportUsers').click(function() {
+        // Export logic
+        alert('Export feature coming soon!');
+    });
+
+    // Send bulk email
+    $('#sendBulkEmail').click(function() {
+        // Bulk email logic
+        alert('Bulk email feature coming soon!');
+    });
+
+    // Delete selected
+    $('#deleteSelected').click(function() {
+        if (confirm('Delete selected users? This action cannot be undone.')) {
+            // Delete logic
+            alert('Delete selected feature coming soon!');
+        }
+    });
+});
+
+function addUser() {
+    const form = $('#addUserForm');
+    if (form[0].checkValidity()) {
+        // AJAX call to add user
+        alert('User added successfully!');
+        $('#addUserModal').modal('hide');
+        form[0].reset();
+    } else {
+        form[0].reportValidity();
+    }
+}
+
+function saveUser() {
+    // Save edited user data
+    alert('User updated successfully!');
+    $('#editUserModal').modal('hide');
+}
+</script>
+{% endblock %}

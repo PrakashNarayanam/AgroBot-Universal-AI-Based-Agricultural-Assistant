@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us - AI-AgroBot{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 fw-bold mb-3">Get In Touch</h1>
+            <p class="lead text-muted">We're here to help with all your farming queries and technical questions</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Contact Form -->
+        <div class="col-lg-8 mb-5 mb-lg-0">
+            <div class="card border-0 shadow-lg">
+                <div class="card-header bg-success text-white py-4">
+                    <h4 class="mb-0">Send us a Message</h4>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <form id="contactForm">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">Full Name *</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email Address *</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="phone" name="phone">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="subject" class="form-label">Subject *</label>
+                                <select class="form-select" id="subject" name="subject" required>
+                                    <option value="">Select a topic</option>
+                                    <option value="general">General Inquiry</option>
+                                    <option value="technical">Technical Support</option>
+                                    <option value="billing">Billing & Payments</option>
+                                    <option value="feature">Feature Request</option>
+                                    <option value="partnership">Partnership Opportunity</option>
+                                    <option value="feedback">Feedback & Suggestions</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="message" class="form-label">Message *</label>
+                            <textarea class="form-control" id="message" name="message" rows="6" required></textarea>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="crop" class="form-label">Your Primary Crop (Optional)</label>
+                            <input type="text" class="form-control" id="crop" name="crop" 
+                                   placeholder="e.g., Wheat, Rice, Vegetables">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="newsletter">
+                                <label class="form-check-label" for="newsletter">
+                                    Subscribe to farming tips and updates
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-send me-2"></i>Send Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="col-lg-4">
+            <!-- Contact Cards -->
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="icon-wrapper bg-success bg-opacity-10 text-success rounded-circle p-3 mb-3 mx-auto">
+                        <i class="bi bi-envelope-fill fs-2"></i>
+                    </div>
+                    <h5>Email Support</h5>
+                    <p class="text-muted mb-2">For general inquiries</p>
+                    <a href="mailto:support@aiagrobot.com" class="text-decoration-none">
+                        support@aiagrobot.com
+                    </a>
+                    <p class="small text-muted mt-2">Response time: 24 hours</p>
+                </div>
+            </div>
+            
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="icon-wrapper bg-warning bg-opacity-10 text-warning rounded-circle p-3 mb-3 mx-auto">
+                        <i class="bi bi-telephone-fill fs-2"></i>
+                    </div>
+                    <h5>Phone Support</h5>
+                    <p class="text-muted mb-2">For urgent assistance</p>
+                    <a href="tel:+919876543210" class="text-decoration-none">
+                        +91 98765 43210
+                    </a>
+                    <p class="small text-muted mt-2">Mon-Sat: 9 AM - 6 PM</p>
+                </div>
+            </div>
+            
+            <div class="card mb-4 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="icon-wrapper bg-info bg-opacity-10 text-info rounded-circle p-3 mb-3 mx-auto">
+                        <i class="bi bi-chat-dots-fill fs-2"></i>
+                    </div>
+                    <h5>Live Chat</h5>
+                    <p class="text-muted mb-2">Instant AI assistance</p>
+                    <a href="{{ url_for('chat') }}" class="btn btn-outline-success">
+                        Open AI Chat
+                    </a>
+                    <p class="small text-muted mt-2">Available 24/7</p>
+                </div>
+            </div>
+            
+            <!-- Office Address -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="mb-3">Office Address</h5>
+                    <div class="d-flex mb-3">
+                        <i class="bi bi-geo-alt-fill text-success me-3"></i>
+                        <div>
+                            <h6 class="mb-1">Head Office</h6>
+                            <p class="mb-0 small text-muted">
+                                AI-AgroBot Technologies<br>
+                                123 Innovation Park<br>
+                                New Delhi - 110001<br>
+                                India
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex mb-3">
+                        <i class="bi bi-clock-fill text-success me-3"></i>
+                        <div>
+                            <h6 class="mb-1">Office Hours</h6>
+                            <p class="mb-0 small text-muted">
+                                Monday - Saturday: 9:00 AM - 6:00 PM<br>
+                                Sunday: Closed
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex">
+                        <i class="bi bi-globe text-success me-3"></i>
+                        <div>
+                            <h6 class="mb-1">Regional Offices</h6>
+                            <p class="mb-0 small text-muted">
+                                Punjab • Maharashtra • Karnataka • Tamil Nadu
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">Frequently Asked Questions</h4>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                    How accurate is the AI's farming advice?
+                                </button>
+                            </h2>
+                            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Our AI is trained on data from agricultural universities, research institutions, and experienced farmers. 
+                                    It provides 95% accurate advice for common farming queries. For complex issues, we recommend consulting local agricultural experts.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                    Is my farming data secure?
+                                </button>
+                            </h2>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Yes, we take data security very seriously. All your farming data is encrypted and stored securely. 
+                                    We never share individual farm data with third parties without your explicit consent.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                    Do you offer support in regional languages?
+                                </button>
+                            </h2>
+                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Yes! AI-AgroBot supports multiple Indian languages including Hindi, Tamil, Telugu, Malayalam, and Kannada. 
+                                    You can switch languages in your profile settings.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                    Can I use AI-AgroBot on mobile?
+                                </button>
+                            </h2>
+                            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Absolutely! AI-AgroBot is fully responsive and works perfectly on smartphones and tablets. 
+                                    You can also save it as a Progressive Web App (PWA) for quick access.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                                    How do you update market prices?
+                                </button>
+                            </h2>
+                            <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    We integrate with multiple APMC (Agricultural Produce Market Committee) databases and use AI algorithms 
+                                    to predict prices. Prices are updated every 15 minutes during market hours.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">Find Us</h4>
+                </div>
+                <div class="card-body p-0">
+                    <div class="map-placeholder bg-light text-center py-5">
+                        <i class="bi bi-map display-1 text-muted mb-3"></i>
+                        <h5>Interactive Map</h5>
+                        <p class="text-muted">Location map showing our offices across India</p>
+                        <button class="btn btn-success">
+                            <i class="bi bi-geo-alt me-2"></i>View on Google Maps
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Support Channels -->
+    <div class="row mt-5">
+        <div class="col-12 text-center">
+            <h3 class="mb-4">Other Ways to Connect</h3>
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <a href="#" class="btn btn-outline-success">
+                    <i class="bi bi-whatsapp me-2"></i>WhatsApp Support
+                </a>
+                <a href="#" class="btn btn-outline-success">
+                    <i class="bi bi-facebook me-2"></i>Facebook Community
+                </a>
+                <a href="#" class="btn btn-outline-success">
+                    <i class="bi bi-twitter me-2"></i>Twitter Updates
+                </a>
+                <a href="#" class="btn btn-outline-success">
+                    <i class="bi bi-youtube me-2"></i>YouTube Tutorials
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center py-5">
+                <div class="icon-wrapper bg-success bg-opacity-10 text-success rounded-circle p-3 mb-3 mx-auto">
+                    <i class="bi bi-check-circle-fill display-4"></i>
+                </div>
+                <h4 class="mb-3">Message Sent Successfully!</h4>
+                <p class="text-muted mb-4">
+                    Thank you for contacting us. We'll get back to you within 24 hours.
+                </p>
+                <button class="btn btn-success" data-bs-dismiss="modal">Continue</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Contact form submission
+    $('#contactForm').submit(function(e) {
+        e.preventDefault();
+        
+        // Simple validation
+        if (this.checkValidity()) {
+            // Simulate form submission
+            setTimeout(() => {
+                $('#successModal').modal('show');
+                this.reset();
+            }, 1000);
+        } else {
+            this.reportValidity();
+        }
+    });
+    
+    // Auto-fill for logged-in users
+    {% if current_user.is_authenticated %}
+    $('#name').val('{{ current_user.name or "" }}');
+    $('#email').val('{{ current_user.email }}');
+    $('#crop').val('{{ current_user.primary_crop or "" }}');
+    {% endif %}
+});
+</script>
+{% endblock %}

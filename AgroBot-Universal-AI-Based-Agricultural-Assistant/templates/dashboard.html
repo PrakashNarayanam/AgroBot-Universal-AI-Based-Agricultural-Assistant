@@ -1,0 +1,405 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - AI-AgroBot{% endblock %}
+
+{% block extra_css %}
+<style>
+.stat-card {
+    transition: transform 0.3s ease;
+    border-radius: 15px;
+    overflow: hidden;
+}
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+.progress {
+    height: 10px;
+}
+.activity-item {
+    border-left: 3px solid #198754;
+    padding-left: 15px;
+    margin-bottom: 20px;
+}
+.quick-action-btn {
+    transition: all 0.3s ease;
+}
+.quick-action-btn:hover {
+    transform: scale(1.05);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title mb-3">Welcome back, {{ current_user.name or 'Farmer' }}!</h1>
+                            <p class="card-text opacity-75">
+                                {% if current_user.primary_crop %}
+                                Monitoring your {{ current_user.primary_crop }} farm in {{ current_user.region or 'your region' }}
+                                {% else %}
+                                Ready to optimize your farming operations today!
+                                {% endif %}
+                            </p>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span class="badge bg-light text-dark">{{ current_user.experience_level|title }} Level</span>
+                                {% if current_user.primary_crop %}
+                                <span class="badge bg-light text-dark">{{ current_user.primary_crop }}</span>
+                                {% endif %}
+                                {% if current_user.farm_size %}
+                                <span class="badge bg-light text-dark">{{ current_user.farm_size }} acres</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <i class="bi bi-person-circle display-1 opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card border-0 bg-primary text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 opacity-75">Total Chats</h6>
+                            <h2 class="card-title mb-0">{{ total_chats }}</h2>
+                        </div>
+                        <i class="bi bi-chat-dots-fill fs-1 opacity-50"></i>
+                    </div>
+                    <p class="card-text small mt-2">AI conversations this month</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card border-0 bg-warning text-dark shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 opacity-75">Images Analyzed</h6>
+                            <h2 class="card-title mb-0">{{ image_analyses|length }}</h2>
+                        </div>
+                        <i class="bi bi-camera-fill fs-1 opacity-50"></i>
+                    </div>
+                    <p class="card-text small mt-2">Plant health assessments</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card border-0 bg-success text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 opacity-75">Active Days</h6>
+                            <h2 class="card-title mb-0">24</h2>
+                        </div>
+                        <i class="bi bi-calendar-check-fill fs-1 opacity-50"></i>
+                    </div>
+                    <p class="card-text small mt-2">Days using AI-AgroBot</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card border-0 bg-info text-white shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-subtitle mb-2 opacity-75">Crop Health</h6>
+                            <h2 class="card-title mb-0">85%</h2>
+                        </div>
+                        <i class="bi bi-heart-fill fs-1 opacity-50"></i>
+                    </div>
+                    <p class="card-text small mt-2">Based on recent analyses</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Recent Activity -->
+            <div class="card mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Activity</h5>
+                    <a href="{{ url_for('chat') }}" class="btn btn-sm btn-success">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if recent_chats %}
+                    <div class="timeline">
+                        {% for chat in recent_chats %}
+                        <div class="activity-item">
+                            <div class="d-flex justify-content-between">
+                                <h6 class="mb-1">
+                                    <i class="bi bi-chat-left-text text-success me-2"></i>
+                                    {{ chat.user_message[:50] }}{% if chat.user_message|length > 50 %}...{% endif %}
+                                </h6>
+                                <small class="text-muted">{{ chat.created_at.strftime('%b %d, %H:%M') if chat.created_at else '' }}</small>
+                            </div>
+                            <p class="mb-1 small text-muted">
+                                {% if chat.bot_response|length > 100 %}
+                                {{ chat.bot_response[:100] }}...
+                                {% else %}
+                                {{ chat.bot_response }}
+                                {% endif %}
+                            </p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-chat-dots fs-1 text-muted mb-3"></i>
+                        <p class="text-muted">No recent activity. Start chatting with AI!</p>
+                        <a href="{{ url_for('chat') }}" class="btn btn-success">Start Chat</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="mb-3">Quick Actions</h5>
+                    <div class="row g-3">
+                        <div class="col-sm-6 col-md-3">
+                            <a href="{{ url_for('chat') }}" class="card quick-action-btn border-0 shadow-sm text-decoration-none">
+                                <div class="card-body text-center p-3">
+                                    <i class="bi bi-chat-dots-fill fs-1 text-success mb-2"></i>
+                                    <h6 class="mb-0">Ask AI</h6>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <a href="{{ url_for('weather') }}" class="card quick-action-btn border-0 shadow-sm text-decoration-none">
+                                <div class="card-body text-center p-3">
+                                    <i class="bi bi-cloud-sun-fill fs-1 text-info mb-2"></i>
+                                    <h6 class="mb-0">Weather</h6>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <a href="{{ url_for('market_prices') }}" class="card quick-action-btn border-0 shadow-sm text-decoration-none">
+                                <div class="card-body text-center p-3">
+                                    <i class="bi bi-graph-up-arrow fs-1 text-warning mb-2"></i>
+                                    <h6 class="mb-0">Market</h6>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <a href="{{ url_for('crop_planner') }}" class="card quick-action-btn border-0 shadow-sm text-decoration-none">
+                                <div class="card-body text-center p-3">
+                                    <i class="bi bi-calendar-check-fill fs-1 text-danger mb-2"></i>
+                                    <h6 class="mb-0">Plan Crop</h6>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- Image Analyses -->
+            <div class="card mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Recent Image Analyses</h5>
+                </div>
+                <div class="card-body">
+                    {% if image_analyses %}
+                    <div class="list-group list-group-flush">
+                        {% for analysis in image_analyses %}
+                        <div class="list-group-item border-0 px-0">
+                            <div class="d-flex align-items-center">
+                                {% if analysis.thumbnail %}
+                                <img src="{{ url_for('uploaded_thumbnail', filename=analysis.thumbnail) }}"
+                                     class="rounded me-3" width="60" height="60" alt="Analysis">
+                                {% else %}
+                                <div class="rounded bg-light d-flex align-items-center justify-content-center me-3"
+                                     style="width: 60px; height: 60px;">
+                                    <i class="bi bi-image text-muted"></i>
+                                </div>
+                                {% endif %}
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ analysis.health_status }}</h6>
+                                    <small class="text-muted">{{ analysis.created_at.strftime('%b %d') if analysis.created_at else '' }}</small>
+                                    <div class="progress mt-1" style="height: 5px;">
+                                        <div class="progress-bar bg-success"
+                                             style="width: {{ analysis.confidence_score * 100 if analysis.confidence_score else 70 }}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('chat') }}" class="btn btn-sm btn-outline-success">Upload More Images</a>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <i class="bi bi-camera fs-1 text-muted mb-3"></i>
+                        <p class="text-muted">No image analyses yet</p>
+                        <a href="{{ url_for('chat') }}" class="btn btn-sm btn-success">Analyze First Image</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Weather Widget -->
+            <div class="card mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Weather</h5>
+                    <small class="text-muted">{{ current_user.region or 'Your Region' }}</small>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <i class="bi bi-cloud-sun-fill display-1 text-info mb-3"></i>
+                        <h2>28°C</h2>
+                        <p class="text-muted">Partly Cloudy</p>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <small class="text-muted d-block">Humidity</small>
+                                <strong>65%</strong>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted d-block">Wind</small>
+                                <strong>12 km/h</strong>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted d-block">Rain</small>
+                                <strong>10%</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="{{ url_for('weather') }}" class="btn btn-sm btn-outline-info w-100">Detailed Forecast</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crop Recommendations -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Recommended Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="alert alert-success">
+                                <h6><i class="bi bi-droplet-fill me-2"></i>Irrigation</h6>
+                                <p class="small mb-0">Water your {{ current_user.primary_crop or 'crops' }} today morning for best results.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="alert alert-warning">
+                                <h6><i class="bi bi-bug-fill me-2"></i>Pest Alert</h6>
+                                <p class="small mb-0">Monitor for aphids. Consider neem oil spray if detected.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="alert alert-info">
+                                <h6><i class="bi bi-cloud-rain-heavy-fill me-2"></i>Weather</h6>
+                                <p class="small mb-0">Rain expected in 2 days. Plan irrigation accordingly.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Usage Statistics -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Monthly Usage</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="chart-container">
+                                <!-- Simple chart using Bootstrap -->
+                                <div class="d-flex align-items-end" style="height: 200px;">
+                                    {% for i in range(7, 0, -1) %}
+                                    <div class="flex-fill text-center mx-1">
+                                        <div class="bg-success rounded-top" style="height: {{ [30, 45, 60, 75, 90, 65, 40][i-1] }}px;"></div>
+                                        <small class="text-muted d-block mt-1">Day {{ i }}</small>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h2>85%</h2>
+                                <p class="text-muted">Monthly Usage</p>
+                                <div class="progress mb-2" style="height: 10px;">
+                                    <div class="progress-bar bg-success" style="width: 85%"></div>
+                                </div>
+                                <p class="small text-muted">You've used 85% of your monthly AI queries</p>
+                                <a href="{{ url_for('pricing') }}" class="btn btn-sm btn-outline-success">Upgrade Plan</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Fetch weather data
+    function fetchWeather() {
+        $.get('/api/weather', function(response) {
+            if (response.success) {
+                // Update weather widget
+                $('.weather-temp').text(response.weather.temperature + '°C');
+                $('.weather-condition').text(response.weather.conditions);
+            }
+        });
+    }
+
+    // Fetch market prices
+    function fetchMarketPrices() {
+        $.get('/api/market-prices', function(response) {
+            if (response.success) {
+                console.log('Market prices:', response.prices);
+            }
+        });
+    }
+
+    // Auto-refresh every 5 minutes
+    setInterval(fetchWeather, 300000);
+
+    // Initial fetch
+    fetchWeather();
+    fetchMarketPrices();
+});
+</script>
+{% endblock %}

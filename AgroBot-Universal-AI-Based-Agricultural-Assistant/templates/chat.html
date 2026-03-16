@@ -1,0 +1,787 @@
+{% extends "base.html" %}
+
+{% block title %}AI Chat - AI-AgroBot{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ===== Global Styles ===== */
+.chat-container {
+    height: calc(100vh - 200px);
+    max-height: 600px;
+    overflow-y: auto;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+    padding: 20px;
+    scroll-behavior: smooth;
+}
+
+.message-bubble {
+    max-width: 80%;
+    border-radius: 20px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    position: relative;
+    word-wrap: break-word;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+    animation: fadeIn 0.3s ease;
+}
+.message-bubble:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,100,0,0.1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.user-message {
+    background: linear-gradient(135deg, #198754, #20c997);
+    color: white;
+    margin-left: auto;
+    border-bottom-right-radius: 4px;
+}
+
+.bot-message {
+    background: linear-gradient(135deg, #ffffff, #f8f9fa);
+    border: 1px solid rgba(0,0,0,0.05);
+    margin-right: auto;
+    border-bottom-left-radius: 4px;
+    color: #212529;
+}
+
+/* Avatars */
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.user-avatar {
+    background: linear-gradient(135deg, #198754, #20c997);
+    color: white;
+    margin-left: 8px;
+}
+.bot-avatar {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    color: white;
+    margin-right: 8px;
+}
+
+/* Typing Indicator */
+.typing-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 16px;
+    background: white;
+    border-radius: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+.typing-dot {
+    width: 10px;
+    height: 10px;
+    background: #198754;
+    border-radius: 50%;
+    animation: typing 1.4s infinite ease-in-out;
+}
+.typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-dot:nth-child(2) { animation-delay: -0.16s; }
+@keyframes typing {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+}
+
+/* Upload Area */
+.upload-area {
+    cursor: pointer;
+    border: 2px dashed #ced4da;
+    border-radius: 16px;
+    transition: all 0.3s;
+    background: white;
+}
+.upload-area:hover {
+    border-color: #198754;
+    background: rgba(25, 135, 84, 0.05);
+    transform: scale(1.02);
+}
+
+/* Quick Action Buttons */
+.quick-action-btn, .suggestion-btn {
+    transition: all 0.2s;
+    border-radius: 30px !important;
+    padding: 8px 16px;
+}
+.quick-action-btn:hover, .suggestion-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(25,135,84,0.2);
+}
+
+/* Reaction Buttons */
+.reaction-buttons {
+    position: absolute;
+    bottom: -10px;
+    right: 10px;
+    background: white;
+    border-radius: 30px;
+    padding: 4px 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+.bot-message:hover .reaction-buttons {
+    opacity: 1;
+}
+.reaction-btn {
+    background: none;
+    border: none;
+    color: #6c757d;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 2px 6px;
+    transition: all 0.2s;
+}
+.reaction-btn:hover {
+    color: #198754;
+    transform: scale(1.2);
+}
+
+/* Voice Button */
+.voice-btn {
+    transition: all 0.2s;
+}
+.voice-btn.listening {
+    background-color: #dc3545 !important;
+    color: white;
+    animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Language Selector */
+.language-selector {
+    border-radius: 30px;
+    border: 1px solid #dee2e6;
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.language-selector:hover {
+    border-color: #198754;
+    background: rgba(25,135,84,0.05);
+}
+
+.chat-input-container {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding-top: 15px;
+    border-top: 1px solid #dee2e6;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-lg-3 col-xl-2 d-none d-lg-block">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h5 class="card-title mb-0">Quick Actions</h5>
+                        <div class="language-selector">
+                            <i class="bi bi-translate me-1"></i>
+                            <select id="languageSelect" class="border-0 bg-transparent">
+                                <option value="en">English</option>
+                                <option value="hi">हिन्दी</option>
+                                <option value="ta">தமிழ்</option>
+                                <option value="te">తెలుగు</option>
+                                <option value="mr">मराठी</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- User Profile -->
+                    <div class="d-flex align-items-center mb-4">
+                        {% if current_user.profile_picture %}
+                        <img src="{{ url_for('uploaded_file', filename=current_user.profile_picture) }}"
+                             class="rounded-circle me-3" width="50" height="50" alt="Profile">
+                        {% else %}
+                        <div class="avatar user-avatar me-3">
+                            <span>{{ current_user.name[0] if current_user.name else 'F' }}</span>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h6 class="mb-0">{{ current_user.name or 'Farmer' }}</h6>
+                            <small class="text-muted">{{ current_user.primary_crop or 'No crop specified' }}</small>
+                        </div>
+                    </div>
+
+                    <!-- Quick Questions -->
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-3">Frequent Queries</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button class="btn btn-sm btn-outline-success quick-action-btn" data-question="How to control aphids on crops?">
+                                <i class="bi bi-bug me-1"></i>Aphids Control
+                            </button>
+                            <button class="btn btn-sm btn-outline-success quick-action-btn" data-question="Best fertilizer for wheat crop?">
+                                <i class="bi bi-flower1 me-1"></i>Wheat Fertilizer
+                            </button>
+                            <button class="btn btn-sm btn-outline-success quick-action-btn" data-question="When is the right time to harvest rice?">
+                                <i class="bi bi-calendar-check me-1"></i>Rice Harvest
+                            </button>
+                            <button class="btn btn-sm btn-outline-success quick-action-btn" data-question="What are organic pest control methods?">
+                                <i class="bi bi-leaf me-1"></i>Organic Control
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Image Upload with Preview -->
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-3">Image Analysis</h6>
+                        <div class="upload-area border rounded p-4 text-center" id="imageUploadArea">
+                            <i class="bi bi-cloud-upload fs-1 text-muted mb-2"></i>
+                            <p class="small mb-2">Click to upload plant image</p>
+                            <img id="imagePreview" src="#" alt="Preview" class="img-fluid rounded d-none mb-2" style="max-height: 100px;">
+                            <input type="file" id="imageUpload" accept="image/*" class="d-none">
+                            <label for="imageUpload" class="btn btn-sm btn-outline-success mb-0">
+                                <i class="bi bi-camera me-1"></i>Upload Image
+                            </label>
+                        </div>
+                        <small class="text-muted">Upload leaf/crop images for disease detection</small>
+                    </div>
+
+                    <!-- Recent Chats & Export -->
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="text-muted mb-0">Recent Chats</h6>
+                            <button class="btn btn-sm btn-outline-success" id="exportChatBtn" title="Export chat">
+                                <i class="bi bi-download"></i>
+                            </button>
+                        </div>
+                        <div class="list-group">
+                            {% for chat in recent_chats[:5] %}
+                            <a href="#" class="list-group-item list-group-item-action border-0 py-2 recent-chat-item"
+                               data-message="{{ chat.user_message }}">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-truncate" style="max-width: 150px;">
+                                        {{ chat.user_message[:30] }}{% if chat.user_message|length > 30 %}...{% endif %}
+                                    </small>
+                                    <small class="text-muted">{{ chat.created_at.strftime('%H:%M') if chat.created_at else '' }}</small>
+                                </div>
+                            </a>
+                            {% else %}
+                            <div class="text-muted small">No recent chats</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="col-lg-9 col-xl-10">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0">🤖 AI Farming Assistant</h5>
+                        <small class="text-muted">Ask me anything about farming, crops, pests, or weather</small>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-success" id="voiceBtn" title="Voice input">
+                            <i class="bi bi-mic"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" id="clearChatBtn">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" id="refreshChatBtn">
+                            <i class="bi bi-arrow-repeat"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Chat Messages Container -->
+                <div class="card-body p-0">
+                    <div class="chat-container p-3" id="chatMessages">
+                        <!-- Messages will be loaded here -->
+                        <div class="text-center text-muted py-5" id="welcomeMessage">
+                            <i class="bi bi-robot fs-1 text-success mb-3"></i>
+                            <h5>Welcome to AI AgroBot!</h5>
+                            <p>I'm your AI farming assistant. How can I help you today?</p>
+                            <div class="d-flex flex-wrap justify-content-center gap-2 mt-3">
+                                <button class="btn btn-sm btn-outline-success quick-action" data-question="How to increase crop yield?">
+                                    <i class="bi bi-graph-up-arrow me-1"></i>Increase Yield
+                                </button>
+                                <button class="btn btn-sm btn-outline-success quick-action" data-question="Best practices for organic farming">
+                                    <i class="bi bi-tree me-1"></i>Organic Farming
+                                </button>
+                                <button class="btn btn-sm btn-outline-success quick-action" data-question="Water conservation methods">
+                                    <i class="bi bi-droplet me-1"></i>Water Conservation
+                                </button>
+                                <button class="btn btn-sm btn-outline-success quick-action" data-question="Soil testing procedure">
+                                    <i class="bi bi-geo-alt me-1"></i>Soil Testing
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Typing Indicator -->
+                    <div id="typingIndicator" class="p-3 d-none">
+                        <div class="typing-indicator">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Input -->
+                <div class="card-footer bg-white chat-input-container">
+                    <form id="chatForm" class="d-flex gap-2">
+                        <div class="flex-grow-1 position-relative">
+                            <input type="text" class="form-control" id="messageInput"
+                                   placeholder="Type your farming question here...">
+                            <div class="position-absolute bottom-0 end-0 mb-2 me-2 d-flex gap-1">
+                                <button type="button" class="btn btn-sm btn-outline-success" id="attachFileBtn" title="Attach image">
+                                    <i class="bi bi-paperclip"></i>
+                                </button>
+                                <input type="file" id="fileUpload" class="d-none" accept="image/*">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success px-4" id="sendButton">
+                            <i class="bi bi-send"></i>
+                        </button>
+                    </form>
+
+                    <!-- Suggestion Chips -->
+                    <div class="mt-2 d-flex flex-wrap gap-2">
+                        <button class="btn btn-sm btn-outline-secondary suggestion-btn" data-suggestion="Explain crop rotation benefits">
+                            <i class="bi bi-arrow-repeat me-1"></i>Crop Rotation
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary suggestion-btn" data-suggestion="Suggest irrigation schedule for tomatoes">
+                            <i class="bi bi-droplet me-1"></i>Irrigation
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary suggestion-btn" data-suggestion="How to prepare soil for organic farming">
+                            <i class="bi bi-flower2 me-1"></i>Soil Prep
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary suggestion-btn" data-suggestion="Weather impact on wheat cultivation">
+                            <i class="bi bi-cloud-sun me-1"></i>Weather Impact
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary suggestion-btn" data-suggestion="Common tomato diseases">
+                            <i class="bi bi-exclamation-triangle me-1"></i>Tomato Diseases
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // DOM Elements
+    const chatForm = document.getElementById('chatForm');
+    const messageInput = document.getElementById('messageInput');
+    const chatMessages = document.getElementById('chatMessages');
+    const typingIndicator = document.getElementById('typingIndicator');
+    const sendButton = document.getElementById('sendButton');
+    const clearChatBtn = document.getElementById('clearChatBtn');
+    const refreshChatBtn = document.getElementById('refreshChatBtn');
+    const imageUpload = document.getElementById('imageUpload');
+    const fileUpload = document.getElementById('fileUpload');
+    const attachFileBtn = document.getElementById('attachFileBtn');
+    const imagePreview = document.getElementById('imagePreview');
+    const welcomeMessage = document.getElementById('welcomeMessage');
+    const voiceBtn = document.getElementById('voiceBtn');
+    const exportChatBtn = document.getElementById('exportChatBtn');
+    const languageSelect = document.getElementById('languageSelect');
+
+    // State
+    let isProcessing = false;
+    let recognition = null;
+
+    // ===== Voice Input Setup =====
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = function() {
+            voiceBtn.classList.add('listening');
+            voiceBtn.innerHTML = '<i class="bi bi-mic-mute"></i>';
+        };
+        recognition.onend = function() {
+            voiceBtn.classList.remove('listening');
+            voiceBtn.innerHTML = '<i class="bi bi-mic"></i>';
+        };
+        recognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript;
+            messageInput.value = transcript;
+            messageInput.focus();
+        };
+        recognition.onerror = function(event) {
+            console.error('Speech error:', event.error);
+            voiceBtn.classList.remove('listening');
+            voiceBtn.innerHTML = '<i class="bi bi-mic"></i>';
+            alert('Voice input failed: ' + event.error);
+        };
+    } else {
+        voiceBtn.disabled = true;
+        voiceBtn.title = 'Voice input not supported in this browser';
+    }
+
+    // ===== Event Listeners =====
+    voiceBtn.addEventListener('click', function() {
+        if (recognition) {
+            if (voiceBtn.classList.contains('listening')) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        }
+    });
+
+    chatForm.addEventListener('submit', handleSubmit);
+    clearChatBtn.addEventListener('click', clearChat);
+    refreshChatBtn.addEventListener('click', refreshChat);
+    attachFileBtn.addEventListener('click', () => fileUpload.click());
+    fileUpload.addEventListener('change', handleImageUpload);
+    imageUpload.addEventListener('change', handleImageUpload);
+    exportChatBtn.addEventListener('click', exportChat);
+
+    // Language change (placeholder – would need backend translation)
+    languageSelect.addEventListener('change', function() {
+        alert('Language switched to ' + this.options[this.selectedIndex].text + '. (Translation not yet implemented)');
+    });
+
+    // Quick question buttons
+    document.querySelectorAll('.quick-action-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const question = this.getAttribute('data-question');
+            messageInput.value = question;
+            messageInput.focus();
+        });
+    });
+
+    // Suggestion buttons
+    document.querySelectorAll('.suggestion-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const suggestion = this.getAttribute('data-suggestion');
+            messageInput.value = suggestion;
+            messageInput.focus();
+        });
+    });
+
+    // Quick action buttons (welcome area)
+    document.querySelectorAll('.quick-action').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const question = this.getAttribute('data-question');
+            sendMessage(question);
+        });
+    });
+
+    // Recent chat items
+    document.querySelectorAll('.recent-chat-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const message = this.getAttribute('data-message');
+            messageInput.value = message;
+            messageInput.focus();
+        });
+    });
+
+    // ===== Functions =====
+    async function handleSubmit(e) {
+        e.preventDefault();
+        const message = messageInput.value.trim();
+
+        if (!message) {
+            alert('Please enter a message');
+            return;
+        }
+
+        if (isProcessing) {
+            alert('Please wait for the current request to complete');
+            return;
+        }
+
+        await sendMessage(message);
+        messageInput.value = '';
+    }
+
+    async function sendMessage(message) {
+        isProcessing = true;
+
+        // Add user message to chat
+        addMessage(message, 'user');
+
+        // Show typing indicator
+        showTypingIndicator();
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            });
+
+            const data = await response.json();
+
+            hideTypingIndicator();
+
+            if (data.success) {
+                addMessage(data.response, 'bot');
+            } else {
+                addMessage('Error: ' + data.response, 'bot');
+            }
+        } catch (error) {
+            hideTypingIndicator();
+            addMessage('Sorry, there was an error connecting to the server. Please try again.', 'bot');
+            console.error('Chat error:', error);
+        } finally {
+            isProcessing = false;
+        }
+    }
+
+    function addMessage(text, sender) {
+        if (welcomeMessage && welcomeMessage.style.display !== 'none') {
+            welcomeMessage.style.display = 'none';
+        }
+
+        const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `d-flex ${sender === 'user' ? 'justify-content-end' : 'justify-content-start'} mb-3`;
+
+        const bubbleWrapper = document.createElement('div');
+        bubbleWrapper.style.maxWidth = '80%';
+
+        // Add avatar for bot
+        if (sender === 'bot') {
+            bubbleWrapper.innerHTML = `
+                <div class="d-flex align-items-end">
+                    <div class="avatar bot-avatar me-2">
+                        <i class="bi bi-robot"></i>
+                    </div>
+                    <div class="message-bubble bot-message position-relative">
+                        <div>${formatMessage(text)}</div>
+                        <small class="d-block text-end opacity-75 mt-1">${timestamp}</small>
+                        <div class="reaction-buttons">
+                            <button class="reaction-btn" onclick="react('👍', ${Date.now()})"><i class="bi bi-hand-thumbs-up"></i></button>
+                            <button class="reaction-btn" onclick="react('👎', ${Date.now()})"><i class="bi bi-hand-thumbs-down"></i></button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            bubbleWrapper.innerHTML = `
+                <div class="d-flex align-items-end flex-row-reverse">
+                    <div class="avatar user-avatar ms-2">
+                        <i class="bi bi-person"></i>
+                    </div>
+                    <div class="message-bubble user-message">
+                        <div>${formatMessage(text)}</div>
+                        <small class="d-block text-end opacity-75 mt-1">${timestamp}</small>
+                    </div>
+                </div>
+            `;
+        }
+
+        messageDiv.appendChild(bubbleWrapper);
+        chatMessages.appendChild(messageDiv);
+        scrollToBottom();
+    }
+
+    function formatMessage(text) {
+        // Replace newlines with <br>
+        text = text.replace(/\n/g, '<br>');
+        // Convert URLs to links
+        text = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-decoration-underline">$1</a>');
+        // Format bullet points
+        text = text.replace(/\* (.*?)(?=\n|$)/g, '• $1<br>');
+        return text;
+    }
+
+    function showTypingIndicator() {
+        typingIndicator.classList.remove('d-none');
+        scrollToBottom();
+    }
+
+    function hideTypingIndicator() {
+        typingIndicator.classList.add('d-none');
+    }
+
+    function scrollToBottom() {
+        chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+    }
+
+    async function clearChat() {
+        if (!confirm('Clear all chat messages?')) return;
+
+        try {
+            const response = await fetch('/api/chat/clear', { method: 'POST' });
+            const data = await response.json();
+            if (data.success) {
+                chatMessages.innerHTML = '';
+                welcomeMessage.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Clear chat error:', error);
+        }
+    }
+
+    async function refreshChat() {
+        try {
+            const response = await fetch('/api/chat/history?limit=50');
+            const data = await response.json();
+
+            if (data.success) {
+                chatMessages.innerHTML = '';
+
+                if (data.history.length === 0) {
+                    welcomeMessage.style.display = 'block';
+                } else {
+                    data.history.forEach(chat => {
+                        addMessage(chat.user_message, 'user');
+                        addMessage(chat.bot_response, 'bot');
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('Refresh chat error:', error);
+        }
+    }
+
+    async function handleImageUpload(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            imagePreview.src = event.target.result;
+            imagePreview.classList.remove('d-none');
+        };
+        reader.readAsDataURL(file);
+
+        const formData = new FormData();
+        formData.append('image', file);
+        formData.append('message', messageInput.value || 'Analyze this image');
+
+        isProcessing = true;
+
+        // Show uploading message
+        addMessage('Uploading image for analysis...', 'user');
+        showTypingIndicator();
+
+        try {
+            const response = await fetch('/api/analyze-image', { method: 'POST', body: formData });
+            const data = await response.json();
+
+            hideTypingIndicator();
+
+            if (data.success) {
+                // Add image preview as a message
+                const imgHtml = `
+                    <div class="d-flex justify-content-end mb-3">
+                        <div class="message-bubble user-message">
+                            <img src="${data.image_url}" class="img-fluid rounded" style="max-width: 200px;">
+                            <p class="small mt-2 mb-0">Image uploaded</p>
+                        </div>
+                    </div>
+                `;
+                chatMessages.insertAdjacentHTML('beforeend', imgHtml);
+
+                // Add analysis result
+                const analysis = data.response;
+                let resultHtml = `
+                    <div class="d-flex justify-content-start mb-3">
+                        <div class="d-flex align-items-end">
+                            <div class="avatar bot-avatar me-2">
+                                <i class="bi bi-robot"></i>
+                            </div>
+                            <div class="message-bubble bot-message">
+                                <h6>🌿 Image Analysis Result</h6>
+                                <p><strong>Health Status:</strong> ${analysis.health_status}</p>
+                                <p><strong>Analysis:</strong> ${analysis.analysis}</p>
+                `;
+
+                if (analysis.green_percentage) {
+                    resultHtml += `<p><strong>Green Percentage:</strong> ${analysis.green_percentage}%</p>`;
+                }
+
+                if (analysis.recommendations && analysis.recommendations.length > 0) {
+                    resultHtml += `<p><strong>Recommendations:</strong></p><ul class="mb-0">`;
+                    analysis.recommendations.forEach(rec => {
+                        resultHtml += `<li>${rec}</li>`;
+                    });
+                    resultHtml += `</ul>`;
+                }
+
+                resultHtml += `</div></div></div>`;
+
+                chatMessages.insertAdjacentHTML('beforeend', resultHtml);
+                scrollToBottom();
+            } else {
+                addMessage('Error analyzing image: ' + data.error, 'bot');
+            }
+        } catch (error) {
+            hideTypingIndicator();
+            addMessage('Error analyzing image. Please try again.', 'bot');
+            console.error('Image analysis error:', error);
+        } finally {
+            e.target.value = '';
+            isProcessing = false;
+        }
+    }
+
+    function exportChat() {
+        const messages = document.querySelectorAll('.message-bubble');
+        let text = 'AI-AgroBot Chat Export\n';
+        text += `Date: ${new Date().toLocaleString()}\n\n`;
+
+        messages.forEach(msg => {
+            const sender = msg.classList.contains('user-message') ? 'You' : 'Bot';
+            const content = msg.innerText.replace(/\n/g, ' ').trim();
+            text += `${sender}: ${content}\n\n`;
+        });
+
+        const blob = new Blob([text], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chat_${new Date().toISOString().slice(0,10)}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // Enter key to send
+    messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            chatForm.dispatchEvent(new Event('submit'));
+        }
+    });
+
+    messageInput.focus();
+});
+
+// Global reaction function (simple alert for demo)
+function react(emoji, timestamp) {
+    alert(`You reacted with ${emoji} (simulated)`);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Pricing - AI-AgroBot{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="py-5 bg-success text-white">
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-4 fw-bold mb-3">Simple, Transparent Pricing</h1>
+                <p class="lead">Choose the perfect plan for your farming needs. No hidden fees.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing Plans -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <!-- Free Plan -->
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-header bg-light text-center py-4">
+                        <h4 class="fw-bold">Free</h4>
+                        <div class="display-4 fw-bold">₹0</div>
+                        <p class="text-muted">per month</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <ul class="list-unstyled mb-4">
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>50 AI queries per day</li>
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>20 image analyses per month</li>
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Basic weather forecast</li>
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Market price data</li>
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>100MB document storage</li>
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Community forum access</li>
+                            <li class="mb-3"><i class="bi bi-x-circle text-muted me-2"></i>Advanced crop planning</li>
+                            <li class="mb-3"><i class="bi bi-x-circle text-muted me-2"></i>Priority support</li>
+                            <li class="mb-3"><i class="bi bi-x-circle text-muted me-2"></i>API access</li>
+                        </ul>
+                        {% if not current_user.is_authenticated %}
+                        <a href="{{ url_for('register') }}" class="btn btn-outline-success w-100">Get Started</a>
+                        {% else %}
+                        <button class="btn btn-outline-success w-100" disabled>Current Plan</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pro Plan -->
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100 border-success shadow-lg" style="transform: scale(1.05);">
+                    <div class="card-header bg-success text-white text-center py-4">
+                        <span class="badge bg-warning position-absolute top-0 start-50 translate-middle px-3 py-2">Most Popular</span>
+                        <h4 class="fw-bold">Pro</h4>
+                        <div class="display-4 fw-bold">₹499</div>
+                        <p class="opacity-75">per month</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <ul class="list-unstyled mb-4">
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Unlimited AI queries</li>
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>100 image analyses per month</li>
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Advanced weather alerts</li>
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Real-time market data</li>
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>5GB document storage</li>
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Advanced crop planning</li>
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Pest database access</li>
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Priority email support</li>
+                            <li class="mb-3"><i class="bi bi-x-circle text-muted me-2"></i>API access</li>
+                        </ul>
+                        <a href="#" class="btn btn-success w-100">Upgrade to Pro</a>
+                        <p class="text-center small mt-2 mb-0">₹4,999 billed annually (save 16%)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enterprise Plan -->
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-header bg-dark text-white text-center py-4">
+                        <h4 class="fw-bold">Enterprise</h4>
+                        <div class="display-4 fw-bold">Custom</div>
+                        <p class="opacity-75">tailored for your needs</p>
+                    </div>
+                    <div class="card-body p-4">
+                        <ul class="list-unstyled mb-4">
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Unlimited everything</li>
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Unlimited image analysis</li>
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Advanced AI models</li>
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Unlimited document storage</li>
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Full API access</li>
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>Custom AI training</li>
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>White-label solutions</li>
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>24/7 dedicated support</li>
+                            <li class="mb-3"><i class="bi bi-check-circle-fill text-success me-2"></i>On-premise deployment</li>
+                        </ul>
+                        <a href="{{ url_for('contact') }}" class="btn btn-dark w-100">Contact Sales</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature Comparison -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <h3 class="text-center mb-4">Detailed Feature Comparison</h3>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Feature</th>
+                                <th class="text-center">Free</th>
+                                <th class="text-center">Pro</th>
+                                <th class="text-center">Enterprise</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>AI Assistant Queries</td>
+                                <td class="text-center">50/day</td>
+                                <td class="text-center">Unlimited</td>
+                                <td class="text-center">Unlimited</td>
+                            </tr>
+                            <tr>
+                                <td>Image Analysis</td>
+                                <td class="text-center">20/month</td>
+                                <td class="text-center">100/month</td>
+                                <td class="text-center">Unlimited</td>
+                            </tr>
+                            <tr>
+                                <td>Response Time</td>
+                                <td class="text-center">Standard</td>
+                                <td class="text-center">Priority</td>
+                                <td class="text-center">Instant</td>
+                            </tr>
+                            <tr>
+                                <td>Document Upload</td>
+                                <td class="text-center">100MB</td>
+                                <td class="text-center">5GB</td>
+                                <td class="text-center">Unlimited</td>
+                            </tr>
+                            <tr>
+                                <td>Data Export</td>
+                                <td class="text-center">CSV only</td>
+                                <td class="text-center">CSV, PDF</td>
+                                <td class="text-center">All formats</td>
+                            </tr>
+                            <tr>
+                                <td>API Access</td>
+                                <td class="text-center"><i class="bi bi-x text-danger"></i></td>
+                                <td class="text-center">Limited</td>
+                                <td class="text-center">Full Access</td>
+                            </tr>
+                            <tr>
+                                <td>Support</td>
+                                <td class="text-center">Community</td>
+                                <td class="text-center">Priority Email</td>
+                                <td class="text-center">24/7 Phone</td>
+                            </tr>
+                            <tr>
+                                <td>SLA Guarantee</td>
+                                <td class="text-center"><i class="bi bi-x text-danger"></i></td>
+                                <td class="text-center">99.5%</td>
+                                <td class="text-center">99.9%</td>
+                            </tr>
+                            <tr>
+                                <td>Custom Training</td>
+                                <td class="text-center"><i class="bi bi-x text-danger"></i></td>
+                                <td class="text-center"><i class="bi bi-x text-danger"></i></td>
+                                <td class="text-center"><i class="bi bi-check text-success"></i></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="row mt-5">
+            <div class="col-lg-8 mx-auto">
+                <h3 class="text-center mb-4">Frequently Asked Questions</h3>
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                Can I switch plans anytime?
+                            </button>
+                        </h2>
+                        <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate your bill accordingly.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                Is there a free trial for paid plans?
+                            </button>
+                        </h2>
+                        <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes! All paid plans come with a 14-day free trial. No credit card required to start the trial.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                What payment methods do you accept?
+                            </button>
+                        </h2>
+                        <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                We accept all major credit/debit cards (Visa, MasterCard, American Express), UPI payments, net banking, and PayPal.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                                Can I cancel my subscription anytime?
+                            </button>
+                        </h2>
+                        <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Absolutely. You can cancel your subscription anytime from your account settings. No cancellation fees.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                                Do you offer discounts for farmers' groups?
+                            </button>
+                        </h2>
+                        <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Yes! We offer special group discounts for farmers' cooperatives, agricultural colleges, and government organizations. Contact our sales team for details.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-light">
+    <div class="container text-center py-5">
+        <h2 class="display-5 fw-bold mb-4">Still Have Questions?</h2>
+        <p class="lead mb-4">Our team is here to help you choose the right plan</p>
+        <a href="{{ url_for('contact') }}" class="btn btn-success btn-lg me-3">Contact Sales</a>
+        <a href="{{ url_for('register') }}" class="btn btn-outline-success btn-lg">Start Free Trial</a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.card {
+    transition: transform 0.3s ease;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+.accordion-button:not(.collapsed) {
+    background-color: #198754;
+    color: white;
+}
+</style>
+{% endblock %}

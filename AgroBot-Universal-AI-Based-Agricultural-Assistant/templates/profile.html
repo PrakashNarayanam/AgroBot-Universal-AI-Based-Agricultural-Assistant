@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - AI AgroBot{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-3">
+            <!-- User Profile Card -->
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        {% if current_user.profile_picture %}
+                            <img src="{{ url_for('uploaded_file', filename=current_user.profile_picture) }}"
+                                 class="rounded-circle" width="120" height="120" alt="Profile Picture">
+                        {% else %}
+                            <div class="rounded-circle bg-primary d-inline-flex align-items-center justify-content-center"
+                                 style="width: 120px; height: 120px;">
+                                <span class="text-white display-6">{{ current_user.name[0] if current_user.name else 'F' }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <h4 class="mb-1">{{ current_user.name or 'Farmer' }}</h4>
+                    <p class="text-muted mb-3">{{ current_user.email }}</p>
+
+                    <!-- Stats -->
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="stat-card">
+                                <h5 class="mb-0">{{ total_chats }}</h5>
+                                <small class="text-muted">Chats</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="stat-card">
+                                <h5 class="mb-0">{{ total_images }}</h5>
+                                <small class="text-muted">Images</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <!-- Profile Update Form -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Update Profile</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="name" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="name" name="name"
+                                       value="{{ current_user.name or '' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="email"
+                                       value="{{ current_user.email }}" disabled>
+                                <small class="text-muted">Email cannot be changed</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="primary_crop" class="form-label">Primary Crop</label>
+                                <select class="form-select" id="primary_crop" name="primary_crop">
+                                    <option value="">Select crop</option>
+                                    <option value="Wheat" {% if current_user.primary_crop == 'Wheat' %}selected{% endif %}>Wheat</option>
+                                    <option value="Rice" {% if current_user.primary_crop == 'Rice' %}selected{% endif %}>Rice</option>
+                                    <option value="Corn" {% if current_user.primary_crop == 'Corn' %}selected{% endif %}>Corn</option>
+                                    <option value="Soybean" {% if current_user.primary_crop == 'Soybean' %}selected{% endif %}>Soybean</option>
+                                    <option value="Cotton" {% if current_user.primary_crop == 'Cotton' %}selected{% endif %}>Cotton</option>
+                                    <option value="Vegetables" {% if current_user.primary_crop == 'Vegetables' %}selected{% endif %}>Vegetables</option>
+                                    <option value="Fruits" {% if current_user.primary_crop == 'Fruits' %}selected{% endif %}>Fruits</option>
+                                    <option value="Mixed" {% if current_user.primary_crop == 'Mixed' %}selected{% endif %}>Mixed Crops</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="region" class="form-label">Region/State</label>
+                                <input type="text" class="form-control" id="region" name="region"
+                                       value="{{ current_user.region or '' }}"
+                                       placeholder="e.g., Punjab, Maharashtra">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="farm_size" class="form-label">Farm Size</label>
+                                <select class="form-select" id="farm_size" name="farm_size">
+                                    <option value="">Select size</option>
+                                    <option value="Small (<5 acres)" {% if current_user.farm_size == 'Small (<5 acres)' %}selected{% endif %}>Small (<5 acres)</option>
+                                    <option value="Medium (5-20 acres)" {% if current_user.farm_size == 'Medium (5-20 acres)' %}selected{% endif %}>Medium (5-20 acres)</option>
+                                    <option value="Large (>20 acres)" {% if current_user.farm_size == 'Large (>20 acres)' %}selected{% endif %}>Large (>20 acres)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="experience_level" class="form-label">Experience Level</label>
+                                <select class="form-select" id="experience_level" name="experience_level">
+                                    <option value="beginner" {% if current_user.experience_level == 'beginner' %}selected{% endif %}>Beginner (< 2 years)</option>
+                                    <option value="intermediate" {% if current_user.experience_level == 'intermediate' %}selected{% endif %}>Intermediate (2-5 years)</option>
+                                    <option value="advanced" {% if current_user.experience_level == 'advanced' %}selected{% endif %}>Advanced (5-10 years)</option>
+                                    <option value="expert" {% if current_user.experience_level == 'expert' %}selected{% endif %}>Expert (>10 years)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="preferred_language" class="form-label">Preferred Language</label>
+                                <select class="form-select" id="preferred_language" name="preferred_language">
+                                    <option value="en" {% if current_user.preferred_language == 'en' %}selected{% endif %}>English</option>
+                                    <option value="hi" {% if current_user.preferred_language == 'hi' %}selected{% endif %}>Hindi</option>
+                                    <option value="ta" {% if current_user.preferred_language == 'ta' %}selected{% endif %}>Tamil</option>
+                                    <option value="te" {% if current_user.preferred_language == 'te' %}selected{% endif %}>Telugu</option>
+                                    <option value="mr" {% if current_user.preferred_language == 'mr' %}selected{% endif %}>Marathi</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="profile_picture" class="form-label">Profile Picture</label>
+                                <input type="file" class="form-control" id="profile_picture" name="profile_picture"
+                                       accept="image/*">
+                                <small class="text-muted">Upload a profile picture (Max 5MB, JPG/PNG)</small>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Update Profile</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Account Info -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Account Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Member Since:</strong>
+                                {% if current_user.created_at %}
+                                    {{ current_user.created_at.strftime('%B %d, %Y') }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </p>
+                            <p><strong>Account Type:</strong> <span class="badge bg-primary">{{ current_user.role|title }}</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Last Login:</strong> Just now</p>
+                            <p><strong>Status:</strong> <span class="badge bg-success">Active</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Preview profile picture before upload
+document.getElementById('profile_picture')?.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.querySelector('.rounded-circle');
+            if (preview && preview.tagName === 'IMG') {
+                preview.src = e.target.result;
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+{% endblock %}

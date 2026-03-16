@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+
+{% block title %}Home - AI-AgroBot{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-gradient-success text-white py-5">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4 animate__animated animate__fadeInUp">
+                    Smart Farming with AI
+                </h1>
+                <p class="lead mb-4 animate__animated animate__fadeInUp animate__delay-1s">
+                    AI-powered agricultural assistant that helps farmers increase yield,
+                    reduce costs, and make data-driven decisions.
+                </p>
+                <div class="animate__animated animate__fadeInUp animate__delay-2s">
+                    {% if not current_user.is_authenticated %}
+                    <a href="{{ url_for('register') }}" class="btn btn-light btn-lg me-3">
+                        Get Started Free
+                    </a>
+                    <a href="{{ url_for('features') }}" class="btn btn-outline-light btn-lg">
+                        Learn More
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-lg me-3">
+                        Go to Dashboard
+                    </a>
+                    <a href="{{ url_for('chat') }}" class="btn btn-outline-light btn-lg">
+                        Start Chatting
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <img src="{{ url_for('static', filename='images/farmer-ai.svg') }}"
+                     class="img-fluid animate__animated animate__fadeIn"
+                     alt="AI Farming"
+                     onerror="this.src='https://via.placeholder.com/600x400?text=AI+Farming'">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Overview -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">Everything You Need</h2>
+            <p class="text-muted">Complete suite of tools for modern farming</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm hover-shadow">
+                    <div class="card-body text-center p-4">
+                        <div class="icon-wrapper bg-success bg-opacity-10 text-success rounded-circle p-3 mb-3 mx-auto" style="width: 70px; height: 70px;">
+                            <i class="bi bi-chat-dots-fill fs-3"></i>
+                        </div>
+                        <h4 class="card-title mb-3">AI Chat Assistant</h4>
+                        <p class="card-text text-muted">
+                            24/7 AI-powered assistance for all your farming queries.
+                            Get instant answers about crops, pests, and techniques.
+                        </p>
+                        <a href="{{ url_for('chat') }}" class="btn btn-outline-success">Try Now</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm hover-shadow">
+                    <div class="card-body text-center p-4">
+                        <div class="icon-wrapper bg-warning bg-opacity-10 text-warning rounded-circle p-3 mb-3 mx-auto" style="width: 70px; height: 70px;">
+                            <i class="bi bi-camera-fill fs-3"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Image Analysis</h4>
+                        <p class="card-text text-muted">
+                            Upload plant images for instant disease detection and
+                            health assessment using advanced AI vision technology.
+                        </p>
+                        <a href="{{ url_for('chat') }}" class="btn btn-outline-warning">Analyze Now</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm hover-shadow">
+                    <div class="card-body text-center p-4">
+                        <div class="icon-wrapper bg-info bg-opacity-10 text-info rounded-circle p-3 mb-3 mx-auto" style="width: 70px; height: 70px;">
+                            <i class="bi bi-graph-up-arrow fs-3"></i>
+                        </div>
+                        <h4 class="card-title mb-3">Market Intelligence</h4>
+                        <p class="card-text text-muted">
+                            Real-time market prices, demand forecasts, and
+                            selling recommendations to maximize your profits.
+                        </p>
+                        <a href="{{ url_for('market_prices') }}" class="btn btn-outline-info">View Prices</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">How It Works</h2>
+            <p class="text-muted">Simple steps to smarter farming</p>
+        </div>
+
+        <div class="row align-items-center">
+            <div class="col-lg-3 text-center">
+                <div class="step-number mb-3">1</div>
+                <h4>Sign Up</h4>
+                <p>Create your free account in minutes</p>
+            </div>
+            <div class="col-lg-3 text-center">
+                <div class="step-number mb-3">2</div>
+                <h4>Set Profile</h4>
+                <p>Tell us about your farm and crops</p>
+            </div>
+            <div class="col-lg-3 text-center">
+                <div class="step-number mb-3">3</div>
+                <h4>Ask Questions</h4>
+                <p>Chat with AI about your farming needs</p>
+            </div>
+            <div class="col-lg-3 text-center">
+                <div class="step-number mb-3">4</div>
+                <h4>Get Results</h4>
+                <p>Receive personalized recommendations</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">What Farmers Say</h2>
+            <p class="text-muted">Join thousands of satisfied farmers</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://via.placeholder.com/50" class="rounded-circle me-3" alt="Farmer">
+                            <div>
+                                <h5 class="mb-0">Manjuladevi</h5>
+                                <small class="text-muted">Rice Farmer, TamilNadu</small>
+                            </div>
+                        </div>
+                        <p class="card-text">
+                            "AI-AgroBot helped me identify a fungal infection early.
+                            Saved my entire crop this season!"
+                        </p>
+                        <div class="text-warning">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://via.placeholder.com/50" class="rounded-circle me-3" alt="Farmer">
+                            <div>
+                                <h5 class="mb-0">Aadhvikyugan</h5>
+                                <small class="text-muted">Organic Farmer, Tamilnadu</small>
+                            </div>
+                        </div>
+                        <p class="card-text">
+                            "The market price predictions are spot on!
+                            I sold my produce at the best time thanks to the insights."
+                        </p>
+                        <div class="text-warning">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-half"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://via.placeholder.com/50" class="rounded-circle me-3" alt="Farmer">
+                            <div>
+                                <h5 class="mb-0">Manju</h5>
+                                <small class="text-muted">Tamilnadu</small>
+                            </div>
+                        </div>
+                        <p class="card-text">
+                            "Perfect fertilizer recommendations for my mango orchard.
+                            Yield increased by 30% this year!"
+                        </p>
+                        <div class="text-warning">
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-success text-white">
+    <div class="container text-center py-5">
+        <h2 class="display-5 fw-bold mb-4">Ready to Transform Your Farming?</h2>
+        <p class="lead mb-4">Join thousands of farmers already benefiting from AI technology</p>
+        {% if not current_user.is_authenticated %}
+        <a href="{{ url_for('register') }}" class="btn btn-light btn-lg px-5 py-3">
+            Start Free Trial
+        </a>
+        {% else %}
+        <a href="{{ url_for('chat') }}" class="btn btn-light btn-lg px-5 py-3">
+            Open AI Chat
+        </a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+}
+
+.step-number {
+    width: 60px;
+    height: 60px;
+    background: #198754;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0 auto;
+}
+
+.hover-shadow:hover {
+    transform: translateY(-5px);
+    transition: transform 0.3s ease;
+}
+
+.icon-wrapper {
+    transition: transform 0.3s ease;
+}
+.card:hover .icon-wrapper {
+    transform: scale(1.1);
+}
+</style>
+{% endblock %}
